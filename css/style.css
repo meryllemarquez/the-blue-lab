@@ -1,0 +1,65 @@
+/* =========================================================
+   THE BLUE LAB — portfolio styles
+   Brand colours live here. Change a hex once, the whole site follows.
+   ========================================================= */
+:root{
+  --blue:#2c46b1;   /* Lab Blue — hero colour            */
+  --gold:#dba12c;   /* Goldenrod — fills & stickers only */
+  --paper:#f4eee2;  /* Paper Cream — page background     */
+  /* fixed brand tones, used directly in the markup:
+     Yale Blue #0f3b59 · Dust Grey #dbd4cc · Cool Steel #7d929e · Dark Coffee (ink) #3e251e */
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:#0f3b59}
+[hidden]{display:none !important}
+a{color:#3e251e}a:hover{color:#2c46b1}
+*{box-sizing:border-box}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit}
+.soft{font-family:'Fraunces',serif;font-variation-settings:'SOFT' 100,'WONK' 1}
+.dropcap::first-letter{float:left;font-family:'Anton',sans-serif;font-size:78px;line-height:.8;padding:6px 10px 0 0;color:var(--blue)}
+.field input,.field select,.field textarea{font-family:'Rubik',sans-serif;font-size:17px;color:#3e251e;background:#ffffff;border:2.5px solid #3e251e;border-radius:12px;padding:10px 14px;min-height:50px;width:100%}
+.field textarea{min-height:130px;resize:vertical}
+input:focus,select:focus,textarea:focus,a:focus-visible,button:focus-visible{outline:3px solid #dba12c;outline-offset:3px}
+.navlink{border-radius:999px;transition:background .2s ease,color .2s ease}
+.navlink:hover{background:#dbd4cc;color:#3e251e}
+.lift{transition:transform .2s ease,box-shadow .2s ease}
+.lift:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #3e251e}
+
+/* --- folded editions: the flap lifts like a newspaper fold --- */
+.flap{position:absolute;inset:0;z-index:3;transform-origin:50% 0;transition:transform .85s cubic-bezier(.65,.05,.25,1),opacity .55s ease .3s,visibility 0s linear 0s;cursor:pointer;border:0;padding:0;text-align:left;overflow:hidden;border-radius:15px}
+.flap:hover .press{transform:rotate(-14deg) scale(1.08)}
+.flap.is-open{transform:rotateX(-108deg);opacity:0;visibility:hidden;pointer-events:none;transition:transform .85s cubic-bezier(.65,.05,.25,1),opacity .5s ease .35s,visibility 0s linear .9s}
+.press{transition:transform .3s ease}
+/* --- the printing roller wipes the ink sheet away --- */
+.reveal{position:relative;overflow:hidden}
+.reveal::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background-color:var(--wash);background-image:radial-gradient(circle,var(--dot) 1.8px,transparent 2.2px);background-size:11px 11px;animation:roll .95s cubic-bezier(.75,0,.2,1) .1s both}
+.reveal::before{content:'';position:absolute;top:0;bottom:0;width:20px;z-index:3;pointer-events:none;border-radius:10px;background:repeating-linear-gradient(0deg,#3e251e 0 7px,#dba12c 7px 14px);animation:roller .95s cubic-bezier(.75,0,.2,1) .1s both}
+@keyframes roll{from{clip-path:inset(0 0 0 0)}to{clip-path:inset(0 0 0 100%)}}
+@keyframes roller{from{left:-20px}to{left:100%}}
+.stamp{animation:stampin .55s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes stampin{from{opacity:0;transform:scale(1.3) rotate(-6deg)}to{opacity:1;transform:scale(1) rotate(var(--r,0deg))}}
+.stamp img{transition:transform .25s ease}
+.stamp:hover img{transform:scale(1.04)}
+.wobble{animation:wobble 4s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes wobble{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(6deg)}}
+@media (prefers-reduced-motion: reduce){.flap,.flap.is-open{transition:none}.reveal::after,.reveal::before,.stamp,.wobble{animation:none}.reveal::after,.reveal::before{display:none}}
+.edition-panel{height:auto !important}
+.walk-media iframe,.walk-media video{display:block;width:100%;height:100%;border:0;background:#0f3b59}
+
+/* phones: keep the masthead tight */
+@media (max-width: 640px){
+  .mast-side{display:none !important}
+  .front-main{border-right:0 !important;padding-right:0 !important}
+}
+
+/* ---- image slots: hold the shape + halftone shimmer while loading ---- */
+.slot{position:relative;overflow:hidden;border-radius:8px;background:#efe8dc}
+.slot::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(44,70,177,.28) 1.6px,transparent 2.1px);background-size:10px 10px;animation:shimmer 1s ease-in-out infinite alternate}
+.slot.is-loaded{background:transparent}
+.slot.is-loaded::before{display:none}
+.slot img{position:relative;display:block;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .45s ease}
+.slot.is-loaded img{opacity:1}
+@keyframes shimmer{from{opacity:.3}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.slot::before{animation:none}.slot img{transition:none}}
