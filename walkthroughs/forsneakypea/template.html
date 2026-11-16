@@ -1,0 +1,1041 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>for sneakypea walkthrough</title>
+<meta name="description" content="Animated walkthrough of for sneakypea, a private web app where a couple keeps memories, plans and love notes. React, Spring Boot, PostgreSQL.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="for sneakypea walkthrough">
+<meta property="og:description" content="Animated walkthrough of a private memories, dates and love-notes app. React, Spring Boot, PostgreSQL.">
+<meta property="og:url" content="https://forsneakypea.vercel.app">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#FFF8E8">
+<style>
+/*@@FONTS@@*/
+
+/* ===== Tokens: copied from fsp_frontend/src/styles/design-tokens.css ===== */
+:root,
+.app[data-theme="light"] {
+/*@@LIGHT@@*/
+}
+:root[data-theme="dark"] {
+/*@@DARK@@*/
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+/*@@DARK@@*/
+  }
+}
+/* the simulated app keeps its own theme regardless of the page theme */
+.app[data-theme="light"] {
+/*@@LIGHT@@*/
+}
+.app[data-theme="dark"] {
+/*@@DARK@@*/
+}
+
+/* ===== Page ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, var(--pattern-dot) 1.4px, transparent 2px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+a { color: var(--link); }
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+.wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: var(--tap); padding: 0 20px;
+  border: var(--border-width) solid var(--outline); border-radius: var(--radius-pill);
+  background: var(--white); color: var(--ink);
+  font-family: var(--font-body); font-weight: 800; font-size: 1rem; line-height: 1;
+  text-decoration: none; cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+.btn:hover { background: var(--sea-tint); }
+.btn.primary { background: var(--tomato); color: var(--on-tomato); box-shadow: var(--shadow-button); min-height: 48px; padding: 0 24px; }
+.btn.primary:hover { background: var(--tomato); transform: translate(-1px,-1px); box-shadow: 5px 5px 0 var(--outline); }
+.btn.primary:active { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--outline); }
+.btn svg { flex: none; }
+
+/* Hero */
+.hero { padding: 28px 0 8px; }
+.brandline { display: flex; align-items: center; gap: 10px; }
+.brandline svg { width: 44px; height: 44px; flex: none; }
+.brandline span { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; letter-spacing: -.5px; }
+.hero h1 {
+  margin: 18px 0 0; font-family: var(--font-heading); font-weight: 800;
+  font-size: clamp(2rem, 6.4vw, 4rem); line-height: 1.06; letter-spacing: -1px; max-width: 18em;
+}
+.marker { padding: 0 6px; background: linear-gradient(transparent 58%, var(--citrus) 58%, var(--citrus) 92%, transparent 92%); color: var(--ink); }
+:root[data-theme="dark"] .marker { color: #172B70; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .marker { color: #172B70; } }
+.hero p.lead { margin: 14px 0 0; max-width: 34em; font-size: clamp(1rem, 2.6vw, 1.1875rem); color: var(--ink-soft); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
+.chips li {
+  padding: 5px 14px; border: var(--border-width) solid var(--outline); border-radius: var(--radius-pill);
+  background: var(--white); font-weight: 800; font-size: .875rem; line-height: 1.2;
+}
+.chips li:nth-child(4n+1) { background: var(--sea-tint); }
+.chips li:nth-child(4n+2) { background: var(--gelato-tint); }
+.chips li:nth-child(4n+3) { background: var(--citrus-tint); }
+.chips li:nth-child(4n) { background: var(--amalfi-tint); }
+.heroBtns { display: flex; flex-wrap: wrap; gap: 14px; margin: 22px 0 0; }
+.note { margin: 10px 0 0; font-size: .875rem; color: var(--ink-muted); }
+
+/* Player */
+.player { padding: 28px 0 24px; }
+.playerGrid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); align-items: center; justify-items: center; }
+.stageCol { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 0; }
+.stage { position: relative; flex: none; touch-action: pan-y; }
+.phone {
+  position: absolute; left: 0; top: 0; width: 414px; height: 868px; transform-origin: 0 0;
+  padding: 12px; background: #172B70; border-radius: 56px; box-shadow: 10px 10px 0 var(--sea);
+}
+.infoCol { align-self: start; position: sticky; top: 16px; width: 100%; min-width: 0; display: flex; flex-direction: column; gap: 16px; max-width: 520px; }
+@media (min-width: 900px), (orientation: landscape) and (min-width: 600px) {
+  .playerGrid { grid-template-columns: auto minmax(0, 1fr); gap: 40px; justify-items: stretch; align-items: start; }
+  .stageCol { width: auto; }
+}
+.captionCard {
+  background: var(--white); border: var(--border-width) solid var(--outline); border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card); padding: 18px 20px; min-height: 150px;
+}
+.eyebrow { margin: 0; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+.sceneTitle { margin: 4px 0 8px; font-family: var(--font-heading); font-weight: 800; font-size: clamp(1.25rem, 3.6vw, 1.6rem); line-height: 1.15; }
+.caption { margin: 0; font-weight: 800; font-size: clamp(1.0625rem, 3.2vw, 1.25rem); line-height: 1.3; min-height: 2.6em; }
+.steps { margin: 0; padding-left: 1.2em; font-weight: 700; }
+.steps li { margin: 2px 0; }
+.callout {
+  display: grid; gap: 4px; margin: 14px 0 0; padding: 10px 14px; background: var(--gelato-tint);
+  border: var(--border-width) dashed var(--outline); border-radius: var(--radius-input); font-size: .95rem; transition: opacity .3s ease;
+}
+.callout[hidden] { display: none; }
+.callout b { font-weight: 800; }
+.callout .arrow { color: var(--tomato); font-weight: 800; }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ctl {
+  display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0;
+  background: var(--white); color: var(--ink); border: var(--border-width) solid var(--outline); border-radius: 50%; cursor: pointer;
+}
+.ctl:hover { background: var(--sea-tint); }
+.ctl.main { background: var(--tomato); color: var(--on-tomato); box-shadow: var(--shadow-button); }
+.ctl.main:hover { background: var(--tomato); }
+.ctl svg { width: 22px; height: 22px; fill: currentColor; }
+.count { margin-left: auto; font-weight: 800; font-size: .95rem; }
+.dots { display: flex; flex-wrap: wrap; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.dot {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  min-width: 44px; min-height: 44px; padding: 4px 6px; background: none; border: 0; border-radius: 12px;
+  color: var(--ink); font: inherit; font-size: .75rem; font-weight: 800; cursor: pointer;
+}
+.dot i { display: block; width: 14px; height: 14px; border: var(--border-width) solid var(--outline); border-radius: 50%; background: var(--white); }
+.dot[aria-current="true"] i { background: var(--citrus); transform: scale(1.25); }
+.dot.done i { background: var(--sea); }
+.dot span { display: none; }
+@media (min-width: 560px) { .dot span { display: block; } }
+.bar { height: 6px; background: var(--line-soft); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 100%; background: var(--citrus); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* Sections below */
+.sec { padding: 40px 0 8px; }
+.sec h2 { margin: 0 0 16px; font-family: var(--font-heading); font-weight: 800; font-size: clamp(1.5rem, 4.4vw, 2.25rem); letter-spacing: -.5px; line-height: 1.1; }
+.list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.list li { background: var(--white); border: var(--border-width) solid var(--outline); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 14px 18px; font-weight: 700; }
+.list li b { display: block; font-family: var(--font-heading); font-weight: 800; margin-bottom: 2px; }
+.list .ev { display: block; margin-top: 4px; font-size: .8125rem; font-weight: 400; color: var(--ink-muted); }
+.tech { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin: 0; }
+.tech div { background: var(--white); border: var(--border-width) solid var(--outline); border-radius: var(--radius-card); padding: 14px 18px; }
+.tech dt { font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+.tech dd { margin: 4px 0 0; font-weight: 700; overflow-wrap: anywhere; }
+footer { margin: 48px 0 0; padding: 24px 0 32px; background: var(--footer-bg); color: var(--footer-ink); }
+footer a { color: var(--footer-ink); }
+footer p { margin: 0; font-size: .9rem; }
+
+/* ===== Simulated app (390 x 844 screen). Component CSS mirrors the app's modules. ===== */
+.app {
+  position: relative; width: 390px; height: 844px; overflow: hidden; border-radius: 44px;
+  background-color: var(--paper);
+  background-image: radial-gradient(circle, var(--pattern-dot) 1.4px, transparent 2px);
+  background-size: 24px 24px;
+  color: var(--ink); font-family: var(--font-body); font-size: 1rem; line-height: 1.5;
+  user-select: none; -webkit-user-select: none;
+}
+.app * { box-sizing: border-box; }
+.app svg { display: block; }
+.hdr { position: absolute; z-index: 5; left: 0; right: 0; top: 0; height: 76px; padding: 20px 16px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; }
+.logo svg { width: 40px; height: 40px; }
+.logo .word { font-family: var(--font-heading); font-weight: 800; font-size: 1.25rem; letter-spacing: -.5px; line-height: 1; }
+.avatar { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: var(--gelato); color: var(--on-bright); border: 3px solid var(--citrus); font-family: var(--font-heading); font-weight: 800; }
+.backbtn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 16px 0 10px; background: var(--white); color: var(--ink); border: 2px solid var(--outline); border-radius: 999px; font-weight: 800; }
+.hdr .ttl { font-family: var(--font-heading); font-weight: 800; font-size: 1.15rem; }
+.view { position: absolute; z-index: 1; left: 0; right: 0; top: 76px; bottom: 78px; overflow-y: auto; overflow-x: hidden; padding: 4px 16px 24px; scrollbar-width: none; transition: opacity .25s ease; }
+.view::-webkit-scrollbar { display: none; }
+.app.bare .hdr, .app.bare .tabbar { display: none; }
+.app.bare .view { top: 0; bottom: 0; padding: 0; }
+.tabbar { position: absolute; z-index: 6; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); min-height: 78px; padding: 6px 10px 12px; background: var(--white); border-top: 2px solid var(--outline); }
+.tab { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 44px; font-size: .75rem; font-weight: 800; }
+.tab .pill { display: flex; align-items: center; justify-content: center; width: 56px; height: 34px; border: 2px solid transparent; border-radius: 999px; }
+.tab.on .pill { background: var(--citrus); border-color: var(--outline); --icon-ink: var(--on-bright); }
+.layer { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; transition: opacity .25s ease; }
+.scrim.in { opacity: 1; }
+.sheet { position: absolute; left: 8px; right: 8px; bottom: 8px; max-height: 88%; overflow: hidden; background: var(--white); color: var(--ink); border: 2px solid var(--outline); border-radius: var(--radius-card-lg); box-shadow: var(--shadow-card); padding: 20px 18px 18px; transform: translateY(110%); transition: transform .35s cubic-bezier(.2,.8,.2,1); }
+.sheet.in { transform: translateY(0); }
+.sheet h2 { margin: 0 0 4px; font-family: var(--font-heading); font-weight: 800; font-size: 1.5rem; line-height: 1.15; }
+.sheet .hint { margin: 0 0 14px; color: var(--ink-muted); font-size: .9rem; }
+.center { position: absolute; left: 24px; right: 24px; top: 50%; background: var(--white); border: 2px solid var(--outline); border-radius: var(--radius-card-lg); box-shadow: var(--shadow-card); padding: 22px 18px; text-align: center; opacity: 0; transform: translateY(-50%) scale(.85) rotate(-2deg); transition: transform .4s cubic-bezier(.3,1.5,.5,1), opacity .2s ease; }
+.center.in { opacity: 1; transform: translateY(-50%) scale(1) rotate(0); }
+.f { display: flex; flex-direction: column; gap: 6px; margin: 0 0 12px; }
+.f label { font-weight: 800; font-size: .95rem; }
+.in-box, .app input, .app textarea { width: 100%; min-height: 48px; padding: 10px 16px; background: var(--white); color: var(--ink); border: 2px solid var(--outline); border-radius: var(--radius-input); font-family: var(--font-body); font-size: 1rem; }
+.app textarea { min-height: 110px; resize: none; display: block; }
+.app input::placeholder, .app textarea::placeholder { color: var(--ink-muted); }
+.app input.focus, .app textarea.focus { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+.abtn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; background: var(--white); color: var(--ink); border: 2px solid var(--outline); border-radius: 999px; font-family: var(--font-body); font-weight: 800; font-size: .95rem; line-height: 1; transition: transform .12s ease, box-shadow .12s ease; }
+.abtn.primary { min-height: 48px; padding: 0 24px; background: var(--tomato); color: var(--on-tomato); box-shadow: 4px 4px 0 var(--outline); font-size: 1rem; }
+.abtn.primary.press { transform: translate(3px,3px); box-shadow: 1px 1px 0 var(--outline); }
+.abtn.block { width: 100%; }
+.abtn.sm { min-height: 40px; padding: 0 14px; }
+.eyebrow2 { margin: 0 0 4px; font-size: .75rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+.h1 { margin: 0; font-family: var(--font-heading); font-weight: 800; font-size: 2.25rem; line-height: 1.06; letter-spacing: -1px; }
+.sub { margin: 6px 0 14px; color: var(--ink-soft); }
+.card { background: var(--white); border: 2px solid var(--outline); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
+.chip { display: inline-flex; flex: none; align-items: center; padding: 3px 12px; border: 2px solid var(--outline); border-radius: 999px; font-size: .8125rem; font-weight: 800; line-height: 1.2; white-space: nowrap; }
+.chip.dreaming { background: var(--sea); color: var(--on-bright); }
+.chip.planning { background: var(--gelato); color: var(--on-bright); }
+.chip.booked { background: var(--citrus); color: var(--on-bright); }
+.chip.ready { background: var(--amalfi); color: var(--white); }
+.chip.completed { background: var(--ink); color: var(--white); }
+.searchrow { display: flex; gap: 10px; margin: 0 0 14px; }
+.searchrow input { flex: 1; min-width: 0; }
+
+/* Auth */
+.auth { position: absolute; inset: 0; background: linear-gradient(to bottom, var(--sky-deep), var(--sky-pale) 70%, var(--sun-pale)); padding: 90px 24px 0; text-align: center; }
+.auth .big { margin: 0; font-family: var(--font-heading); font-weight: 800; font-size: 3rem; line-height: 1; letter-spacing: -1.5px; }
+.auth .tag { margin: 12px auto 28px; max-width: 14em; font-size: 1.1rem; color: var(--ink-soft); font-weight: 700; }
+.sun { position: absolute; right: 36px; top: 44px; opacity: .95; }
+.auth .logoBig { margin: 36px auto 0; width: 150px; height: 150px; }
+
+/* Home */
+.hero2 { padding: 8px 0 14px; }
+.hero2 .h1 { font-size: 2.4rem; }
+.mk { padding: 0 6px; font-style: italic; background: linear-gradient(transparent 58%, var(--citrus) 58%, var(--citrus) 92%, transparent 92%); }
+.hcard { display: flex; align-items: center; gap: 14px; padding: 14px 16px; margin: 0 0 14px; }
+.hcard b { font-family: var(--font-heading); font-weight: 800; display: block; font-size: 1.1rem; line-height: 1.2; }
+.hcard span { color: var(--ink-muted); font-size: .9rem; }
+.hcard.cit { box-shadow: var(--shadow-card-citrus); }
+
+/* Memories */
+.albums { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.album { overflow: hidden; }
+.album .cover { display: flex; align-items: center; justify-content: center; height: 108px; border-bottom: 2px solid var(--outline); }
+.album .meta { padding: 8px 12px 10px; }
+.album b { display: block; font-family: var(--font-heading); font-weight: 800; font-size: .98rem; line-height: 1.2; }
+.album small { color: var(--ink-muted); font-size: .8rem; }
+.album.new { display: flex; align-items: center; justify-content: center; text-align: center; min-height: 160px; border-style: dashed; box-shadow: none; padding: 10px; background: var(--surface-sunk); font-weight: 800; }
+.photos { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.photo { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border: 2px solid var(--outline); border-radius: 16px; transform-origin: 50% 50%; }
+.photo.add { animation: pop .45s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes pop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
+
+/* Dates */
+.dcard { padding: 14px 16px; margin: 0 0 14px; }
+.dcard .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dcard b { font-family: var(--font-heading); font-weight: 800; font-size: 1.05rem; line-height: 1.2; }
+.dcard .meta { margin: 6px 0 0; font-size: .875rem; color: var(--ink-muted); }
+.prog { height: 10px; margin: 10px 0 0; border: 2px solid var(--outline); border-radius: 99px; background: var(--white); overflow: hidden; }
+.prog i { display: block; height: 100%; width: 100%; background: var(--citrus); transform-origin: 0 50%; transition: transform .5s ease; }
+.drawer { position: absolute; left: 0; right: 0; bottom: 0; height: 78%; background: var(--white); border-top: 2px solid var(--outline); border-radius: 28px 28px 0 0; padding: 20px 18px; transform: translateY(105%); transition: transform .4s cubic-bezier(.2,.8,.2,1); overflow: hidden; }
+.drawer.in { transform: translateY(0); }
+.drawer h2 { margin: 6px 0 4px; font-family: var(--font-heading); font-weight: 800; font-size: 1.4rem; line-height: 1.15; }
+.step { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 6px 12px; margin: 0 0 8px; background: var(--surface-sunk); border: 2px solid var(--outline); border-radius: var(--radius-input); font-weight: 700; }
+.cb { flex: none; display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 2px solid var(--outline); border-radius: 8px; background: var(--white); }
+.cb svg { opacity: 0; transform: scale(.4); transition: transform .25s cubic-bezier(.3,1.5,.5,1), opacity .15s ease; }
+.step.done .cb { background: var(--citrus); }
+.step.done .cb svg { opacity: 1; transform: scale(1); }
+.step.done span { text-decoration: line-through; color: var(--ink-muted); }
+.allDone { margin: 12px 0 0; padding: 10px 14px; background: var(--gelato-tint); border: 2px solid var(--outline); border-radius: var(--radius-input); font-weight: 800; opacity: 0; transform: translateY(8px); transition: opacity .3s ease, transform .3s ease; }
+.allDone.in { opacity: 1; transform: none; }
+
+/* Love board */
+.lb { position: relative; height: 560px; border: 3px solid var(--outline); border-radius: 28px; box-shadow: 8px 8px 0 var(--shadow-sea); overflow: hidden;
+  background-color: var(--paper-warm);
+  background-image:
+    linear-gradient(to right, transparent 46px, color-mix(in srgb, var(--tomato) 45%, transparent) 46px, color-mix(in srgb, var(--tomato) 45%, transparent) 49px, transparent 49px),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 36px, color-mix(in srgb, var(--sea) 60%, transparent) 36px, color-mix(in srgb, var(--sea) 60%, transparent) 39px); }
+.paper { position: absolute; width: 150px; min-height: 120px; padding: 18px 12px 12px; border: 2px solid var(--outline); border-radius: 6px; box-shadow: 4px 5px 0 var(--drop-shadow); font-family: var(--font-hand); font-weight: 700; font-size: 1.2rem; line-height: 1.15; color: var(--ink); }
+.paper small { display: block; margin-top: 6px; font-family: var(--font-body); font-weight: 800; font-size: .72rem; color: var(--ink-muted); }
+.tape { position: absolute; top: -10px; left: 50%; width: 56px; height: 20px; margin-left: -28px; background: color-mix(in srgb, var(--citrus) 70%, transparent); border: 2px solid var(--outline); transform: rotate(-3deg); }
+.paper.new { animation: drop .6s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes drop { from { opacity: 0; transform: translateY(-40px) rotate(8deg) scale(1.2); } to { opacity: 1; } }
+.sticker { position: absolute; animation: pop .45s cubic-bezier(.3,1.5,.5,1) both; }
+.fab { position: absolute; right: 14px; bottom: 14px; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 20px; background: var(--tomato); color: var(--on-tomato); border: 2px solid var(--outline); border-radius: 999px; box-shadow: 4px 4px 0 var(--outline); font-weight: 800; }
+.lbtools { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 8px; }
+.round { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; background: var(--white); border: 2px solid var(--outline); border-radius: 50%; }
+.paperPick { display: flex; gap: 8px; margin: 0 0 12px; }
+.sw { width: 44px; height: 44px; border: 2px solid var(--outline); border-radius: 12px; }
+.sw.sel { outline: var(--focus-ring); outline-offset: 2px; }
+.stickerTray { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 18px; background: var(--white); border-top: 2px solid var(--outline); border-radius: 24px 24px 0 0; transform: translateY(105%); transition: transform .35s cubic-bezier(.2,.8,.2,1); display: flex; gap: 12px; align-items: center; justify-content: space-around; }
+.stickerTray.in { transform: none; }
+
+/* Wheel */
+.wheelWrap { position: relative; width: 300px; height: 300px; margin: 8px auto 18px; }
+.wheelWrap .rot { width: 300px; height: 300px; transform-origin: 50% 50%; will-change: transform; }
+.pointer { position: absolute; left: 50%; top: -14px; margin-left: -16px; z-index: 2; }
+.pills { display: flex; gap: 8px; margin: 0 0 8px; }
+.pill2 { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 2px solid var(--outline); border-radius: 999px; font-weight: 800; background: var(--white); }
+.pill2.on { background: var(--citrus); color: var(--on-bright); }
+.result { margin: 6px 0 14px; font-family: var(--font-heading); font-weight: 800; font-size: 2rem; line-height: 1.1; }
+.lead { margin: 10px 0 0; color: var(--ink-muted); font-weight: 800; }
+.row2 { display: flex; gap: 10px; justify-content: center; }
+
+/* Bouquet */
+.bq { position: relative; width: 358px; height: 300px; margin: 6px 0 12px; overflow: hidden; background: var(--paper-warm); }
+.bq .fl { position: absolute; width: 84px; height: 84px; z-index: 2; animation: pop .5s cubic-bezier(.3,1.5,.5,1) both; }
+.bq svg.wrapsvg { position: absolute; left: 0; bottom: 0; z-index: 3; }
+.tabs2 { display: flex; gap: 4px; padding: 5px; background: var(--white); border: 2px solid var(--outline); border-radius: 999px; margin: 0 0 12px; }
+.tabs2 span { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 999px; font-weight: 800; font-size: .95rem; }
+.tabs2 span.on { background: var(--citrus); color: var(--on-bright); }
+.tray { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tile { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; background: var(--white); border: 2px solid var(--outline); border-radius: 14px; font-size: .75rem; font-weight: 800; }
+.swatches { display: flex; gap: 12px; flex-wrap: wrap; }
+.swc { width: 48px; height: 48px; border: 2px solid var(--outline); border-radius: 50%; }
+.swc.sel { outline: var(--focus-ring); outline-offset: 2px; }
+.hintline { margin: 10px 0 0; font-weight: 800; opacity: 0; transition: opacity .3s ease; }
+.hintline.in { opacity: 1; }
+
+/* Pets */
+.room { position: relative; height: 230px; margin: 0 0 12px; overflow: hidden; background: linear-gradient(to bottom, var(--sky-pale), var(--sun-pale)); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+.room .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: var(--gelato-tint); border-top: 2px solid var(--outline); }
+.petwrap { position: relative; z-index: 1; animation: bob 2.4s ease-in-out infinite; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.bubble { position: absolute; z-index: 2; left: 50%; top: 14px; margin-left: 24px; display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 4px 14px; background: var(--white); border: 2px solid var(--outline); border-radius: 18px; font-weight: 800; transition: opacity .25s ease, transform .25s ease; }
+.bubble.off { opacity: 0; transform: translateY(8px) scale(.8); }
+.food { position: absolute; z-index: 3; left: 50%; top: 20px; margin-left: -20px; opacity: 0; }
+.food.go { animation: feed 1s ease-in forwards; }
+@keyframes feed { 0% { opacity: 1; transform: translateY(0) scale(1); } 70% { opacity: 1; transform: translateY(70px) scale(.9); } 100% { opacity: 0; transform: translateY(90px) scale(.4); } }
+.meter { display: grid; grid-template-columns: 26px 78px 1fr auto; align-items: center; gap: 8px; margin: 0 0 10px; font-weight: 800; font-size: .9rem; }
+.meter .trk { height: 12px; border: 2px solid var(--outline); border-radius: 99px; background: var(--white); overflow: hidden; }
+.meter .trk i { display: block; height: 100%; width: 100%; background: var(--citrus); transform-origin: 0 50%; transition: transform .6s ease; }
+.meter em { font-style: normal; min-width: 5.4em; text-align: right; color: var(--ink-muted); }
+.acts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.acts .abtn { padding: 0 6px; }
+.menu { position: absolute; z-index: 7; right: 14px; top: 68px; width: 220px; padding: 12px; background: var(--white); border: 2px solid var(--outline); border-radius: 20px; box-shadow: var(--shadow-card); opacity: 0; transform: translateY(-6px) scale(.96); transform-origin: 100% 0; transition: opacity .2s ease, transform .2s ease; }
+.menu.in { opacity: 1; transform: none; }
+.menu p { margin: 0 0 8px; font-family: var(--font-heading); font-weight: 800; }
+.menu .mi { display: flex; align-items: center; min-height: 44px; padding: 0 8px; font-weight: 800; }
+.themes { display: flex; gap: 8px; padding: 6px 0; }
+.themes .round { width: 44px; height: 44px; }
+.themes .round.sel { background: var(--citrus); }
+
+/* overlay: cursor + spotlight */
+.spot { position: absolute; z-index: 30; pointer-events: none; border: 3px solid var(--tomato); border-radius: 18px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--tomato) 22%, transparent); opacity: 0; transition: opacity .25s ease; }
+.spot.on { opacity: 1; }
+.cursor { position: absolute; z-index: 40; left: 0; top: 0; width: 0; height: 0; pointer-events: none; opacity: 0; transition: transform .7s cubic-bezier(.4,0,.2,1), opacity .25s ease; will-change: transform; }
+.cursor.on { opacity: 1; }
+.cursor .dotc { position: absolute; left: -15px; top: -15px; width: 30px; height: 30px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 28%, transparent); border: 2px solid var(--ink); transition: transform .12s ease; }
+.cursor.down .dotc { transform: scale(.8); }
+.cursor .rip { position: absolute; left: -30px; top: -30px; width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--tomato); opacity: 0; }
+.cursor .rip.go { animation: rip .55s ease-out; }
+@keyframes rip { from { opacity: .9; transform: scale(.3); } to { opacity: 0; transform: scale(1.3); } }
+
+/* reduced motion: no autoplay, no travel, no transitions */
+.rm .app *, .rm .app { transition: none !important; animation: none !important; }
+.rm .cursor { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .petwrap { animation: none; }
+  .btn, .ctl { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brandline" id="brandMark" aria-hidden="true"></div>
+    <h1>A quiet little <span class="marker">archive of us.</span></h1>
+    <p class="lead">for sneakypea is a private web app where a couple keeps memories, plans and love notes. Solo full-stack build, design to deployment.</p>
+    <ul class="chips" aria-label="Tech stack">
+      <li>React 19</li><li>Vite</li><li>Java 21</li><li>Spring Boot 3.4</li><li>PostgreSQL</li><li>Supabase</li><li>Vercel</li><li>Render</li>
+    </ul>
+    <div class="heroBtns">
+      <a class="btn primary" href="https://forsneakypea.vercel.app" target="_blank" rel="noopener">Live site</a>
+      <a class="btn" href="https://github.com/meryllemarquez/forsneakypeav1" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <p class="note">The live site is invite-only. This page shows it with sample data.</p>
+  </div>
+</header>
+
+<main>
+<section class="player" aria-labelledby="pl-h">
+  <div class="wrap">
+    <h2 id="pl-h" class="sr">Walkthrough</h2>
+    <div class="playerGrid" id="playerGrid">
+      <div class="stageCol">
+        <div class="stage" id="stage">
+          <div class="phone" id="phone" aria-hidden="true">
+            <div class="app" id="app" data-theme="light">
+              <div class="hdr" id="hdr"></div>
+              <div class="view" id="view"></div>
+              <nav class="tabbar" id="tabbar"></nav>
+              <div class="layer" id="layer"></div>
+              <div class="spot" id="spot"></div>
+              <div class="cursor" id="cursor"><i class="dotc"></i><i class="rip"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="infoCol" id="player" role="group" aria-label="Walkthrough player">
+        <div class="captionCard">
+          <p class="eyebrow" id="eyebrow">Scene 1 of 7</p>
+          <h3 class="sceneTitle" id="sceneTitle">Sign in</h3>
+          <p class="caption" id="caption" aria-live="polite"></p>
+          <ol class="steps" id="stepList" hidden></ol>
+          <div class="callout" id="callout" hidden>
+            <span><b>Problem</b> <span id="coProblem"></span></span>
+            <span><span class="arrow" aria-hidden="true">&rarr;</span> <b>Solved</b> <span id="coSolved"></span></span>
+          </div>
+        </div>
+        <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+        <div class="controls">
+          <button class="ctl" id="prev" type="button" aria-label="Previous scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3v18L7 12z"/><path d="M5 4h2v16H5z"/></svg></button>
+          <button class="ctl main" id="play" type="button" aria-label="Pause"><svg viewBox="0 0 24 24" aria-hidden="true" id="playIcon"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>
+          <button class="ctl" id="next" type="button" aria-label="Next scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v18l10-9z"/><path d="M17 4h2v16h-2z"/></svg></button>
+          <button class="ctl" id="replay" type="button" aria-label="Replay scene"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+          <span class="count" id="count" aria-hidden="true">1 / 7</span>
+        </div>
+        <ol class="dots" id="dots" aria-label="Scenes"></ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="kf">
+  <div class="wrap">
+    <h2 id="kf">Key features</h2>
+    <ul class="list">
+      <li><b>Memories</b>Albums, multi-photo upload, album download.<span class="ev">MemoriesPage.jsx, MemoryController</span></li>
+      <li><b>Dates</b>Bucket list with statuses and step checklists.<span class="ev">DatesPage.jsx, ChecklistItemController</span></li>
+      <li><b>Love Board</b>Notes, stickers and layers on a paper board.<span class="ev">LoveLettersPage.jsx, LoveBoardController</span></li>
+      <li><b>Spin the wheel</b>Custom wheels decide where to eat or go.<span class="ev">WheelPage.jsx, WheelController</span></li>
+      <li><b>Bouquet maker</b>Compose a bouquet, save it, export a PNG.<span class="ev">BouquetMakerPage.jsx, BouquetController</span></li>
+      <li><b>Pets and dark mode</b>Pet moods from care, light and dark themes.<span class="ev">PetsPage.jsx, ThemeProvider.jsx</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="ps">
+  <div class="wrap">
+    <h2 id="ps">Problems solved</h2>
+    <ul class="list">
+      <li><b>Open sign-up on a private app</b>Registration code, user-only accounts, CORS allowlist, rate limiter.<span class="ev">Commit 2f5dd68</span></li>
+      <li><b>Photos on public links</b>Photos moved to Google Drive behind private signed links.<span class="ev">Commit a0eac49</span></li>
+      <li><b>Slow pages, many database trips</b>Flyway indexes, one home summary call, lazy-loaded pages.<span class="ev">Commits b68e4b7, 340635e, 9d81383</span></li>
+      <li><b>Hard to use on a phone</b>236-run mobile audit fixed keyboard overlap and tap targets.<span class="ev">docs/mobile-audit.md</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="td">
+  <div class="wrap">
+    <h2 id="td">Tech and deployment</h2>
+    <dl class="tech">
+      <div><dt>Frontend</dt><dd>React 19, Vite, React Router, TanStack Query, Framer Motion, CSS Modules</dd></div>
+      <div><dt>Backend</dt><dd>Java 21, Spring Boot 3.4, Spring Data JPA, Flyway, JWT auth</dd></div>
+      <div><dt>Data</dt><dd>PostgreSQL on Supabase, photos on Google Drive</dd></div>
+      <div><dt>Hosting</dt><dd>Vercel (frontend), Render with Docker (backend)</dd></div>
+      <div><dt>Quality</dt><dd>GitHub Actions CI: backend tests and frontend build</dd></div>
+      <div><dt>Status</dt><dd>Live, 2026. Built solo.</dd></div>
+    </dl>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap"><p>Walkthrough uses sample data only. App: <a href="https://forsneakypea.vercel.app" target="_blank" rel="noopener">forsneakypea.vercel.app</a> &middot; <a href="https://github.com/meryllemarquez/forsneakypeav1" target="_blank" rel="noopener">GitHub</a></p></div>
+</footer>
+
+<script>
+(() => {
+'use strict';
+const G = @@GLYPHS@@;
+const LOGO = @@LOGO@@;
+const $ = (s, r = document) => r.querySelector(s);
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (REDUCED) document.documentElement.classList.add('rm');
+
+/* ---------- icons (same markup as components/Icon/Icon.jsx) ---------- */
+function icon(name, size = 24, o = {}) {
+  const g = G[name]; if (!g) return '';
+  const b = Math.max(2, Math.round(size / 28));
+  const wrap = o.sticker
+    ? `display:inline-flex;align-items:center;justify-content:center;flex:none;width:${size}px;height:${size}px;border-radius:50%;background:var(--white);border:${b}px solid var(--outline);box-shadow:${b}px ${b + 1}px 0 var(--outline);transform:rotate(${o.tilt || 0}deg)`
+    : `display:inline-flex;flex:none;width:${size}px;height:${size}px;${o.tilt ? `transform:rotate(${o.tilt}deg)` : ''}`;
+  const s = o.sticker ? '72%' : '100%';
+  return `<span style="color:var(--icon-ink,#172B70);${wrap}"><svg viewBox="0 0 64 64" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">${g}</svg></span>`;
+}
+const chev = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+const tick = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--on-bright)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg>';
+$('#brandMark').innerHTML = LOGO + '<span>for sneakypea</span>';
+
+/* ---------- elements ---------- */
+const app = $('#app'), hdr = $('#hdr'), view = $('#view'), tabbar = $('#tabbar'), layer = $('#layer');
+const spot = $('#spot'), cursor = $('#cursor');
+const phone = $('#phone'), stage = $('#stage'), grid = $('#playerGrid');
+let scale = 1;
+
+/* ---------- fixed canvas scaling ---------- */
+function layout() {
+  const side = grid.getBoundingClientRect().width >= 1 && getComputedStyle(grid).gridTemplateColumns.split(' ').length > 1;
+  const avail = Math.min(grid.getBoundingClientRect().width, 1200 - 32);
+  let s;
+  if (side) {
+    const byH = Math.max((window.innerHeight - 60) / 868, 0.5);
+    const byW = Math.max(avail * 0.46, 200) / 424;
+    s = Math.min(byH, byW, 1.3);
+  } else {
+    s = Math.min(avail / 424, 1.3);
+  }
+  s = Math.max(s, 0.3);
+  scale = s;
+  phone.style.transform = `scale(${s})`;
+  stage.style.width = Math.round(414 * s + 10 * s) + 'px';
+  stage.style.height = Math.round(868 * s + 10 * s) + 'px';
+}
+let raf = 0;
+new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(layout); }).observe(document.body);
+window.addEventListener('resize', layout);
+
+/* ---------- engine ---------- */
+let token = 0, paused = false, cur = 0, running = false, autoplay = !REDUCED, userPaused = false;
+const CANCEL = { cancel: true };
+const wait = (ms) => new Promise((res, rej) => {
+  const my = token; let left = REDUCED ? 0 : ms;
+  const tick = () => {
+    if (my !== token) return rej(CANCEL);
+    if (!paused) left -= 40;
+    if (left <= 0) return res();
+    setTimeout(tick, 40);
+  };
+  tick();
+});
+function relRect(el) {
+  const a = app.getBoundingClientRect(), r = el.getBoundingClientRect();
+  return { x: (r.left - a.left) / scale, y: (r.top - a.top) / scale, w: r.width / scale, h: r.height / scale };
+}
+const ctx = {
+  app, view, layer,
+  q: (s) => app.querySelector(s),
+  wait,
+  say(text) { setCaption(text); },
+  spot(el, pad = 6) {
+    if (!el) { spot.classList.remove('on'); return; }
+    const r = relRect(el);
+    Object.assign(spot.style, { left: r.x - pad + 'px', top: r.y - pad + 'px', width: r.w + pad * 2 + 'px', height: r.h + pad * 2 + 'px' });
+    spot.classList.add('on');
+  },
+  unspot() { spot.classList.remove('on'); },
+  async reveal(el) {
+    const v = relRect(view), r = relRect(el);
+    if (r.y < v.y || r.y + r.h > v.y + v.h) {
+      view.scrollTo({ top: view.scrollTop + (r.y - v.y) - 40, behavior: REDUCED ? 'auto' : 'smooth' });
+      await wait(650);
+    }
+  },
+  async move(el) {
+    if (REDUCED) return;
+    const r = relRect(el);
+    cursor.classList.add('on');
+    cursor.style.transform = `translate(${r.x + r.w / 2}px, ${r.y + r.h / 2}px)`;
+    await wait(780);
+  },
+  async tap(el) {
+    if (!el) return;
+    await ctx.reveal(el);
+    await ctx.move(el);
+    if (REDUCED) return;
+    cursor.classList.add('down');
+    const rip = cursor.querySelector('.rip');
+    rip.classList.remove('go'); void rip.offsetWidth; rip.classList.add('go');
+    await wait(160);
+    cursor.classList.remove('down');
+    await wait(120);
+  },
+  async type(input, text, delay = 70) {
+    input.classList.add('focus');
+    for (const ch of text) { input.value += ch; await wait(delay); }
+    input.classList.remove('focus');
+  },
+  async typeTA(ta, text, delay = 45) {
+    ta.classList.add('focus');
+    for (const ch of text) { ta.value += ch; await wait(delay); }
+    ta.classList.remove('focus');
+  },
+  chrome({ mode = 'main', title = '', tab = -1, bare = false }) {
+    app.classList.toggle('bare', bare);
+    hdr.innerHTML = mode === 'back'
+      ? `<span class="backbtn">${chev}Home</span><span class="ttl">${title}</span><span class="avatar" id="avatar">A</span>`
+      : `<span class="logo">${LOGO}<span class="word">for sneakypea</span></span><span class="avatar" id="avatar">A</span>`;
+    const items = [['Home', 'house'], ['Memories', 'camera'], ['Dates', 'motmot'], ['Letters', 'envelope']];
+    tabbar.innerHTML = items.map((t, i) => `<div class="tab ${i === tab ? 'on' : ''}"><span class="pill">${icon(t[1], 26)}</span>${t[0]}</div>`).join('');
+  },
+  set(html) { view.innerHTML = html; view.scrollTop = 0; },
+  async fade(html) {
+    view.style.opacity = '0'; await wait(250);
+    view.innerHTML = html; view.scrollTop = 0; view.style.opacity = '1'; await wait(250);
+  },
+  overlay(html) { layer.innerHTML = html; },
+  async openSheet(html) {
+    layer.innerHTML = `<div class="scrim"></div><div class="sheet">${html}</div>`;
+    layer.style.pointerEvents = 'auto';
+    void layer.offsetWidth;
+    layer.querySelector('.scrim').classList.add('in'); layer.querySelector('.sheet').classList.add('in');
+    await wait(450);
+  },
+  async closeLayer() {
+    const s = layer.querySelector('.sheet') || layer.querySelector('.center');
+    layer.querySelector('.scrim')?.classList.remove('in');
+    if (s) s.classList.remove('in');
+    await wait(400); layer.innerHTML = ''; layer.style.pointerEvents = 'none';
+  },
+  theme(t) { app.setAttribute('data-theme', t); },
+  callout(p, s) { setCallout(p, s); },
+};
+
+/* ---------- caption / panel ---------- */
+const capEl = $('#caption'), titleEl = $('#sceneTitle'), eyeEl = $('#eyebrow'), stepList = $('#stepList');
+const coEl = $('#callout'), coP = $('#coProblem'), coS = $('#coSolved');
+let steps = [];
+function setCaption(t) {
+  capEl.textContent = t;
+  steps.push(t);
+  if (REDUCED) {
+    stepList.hidden = false; capEl.hidden = true;
+    stepList.innerHTML = steps.map((s) => `<li>${s}</li>`).join('');
+  }
+}
+function setCallout(p, s) {
+  if (!p) { coEl.hidden = true; return; }
+  coP.textContent = p; coS.textContent = s; coEl.hidden = false;
+}
+
+/* ---------- sample data (invented) ---------- */
+const WHEEL = [
+  { l: 'Pizza', c: '#5CB3FF', g: 'pizza' }, { l: 'Ramen', c: '#FF9F1C', g: 'ramen' }, { l: 'Burger', c: '#FFE680', g: 'burger' },
+  { l: 'Sushi', c: '#1F55C9', g: 'sushi', dark: true }, { l: 'Milk tea', c: '#CDE7FF', g: 'milkTea' }, { l: 'Lasagna', c: '#FFD8A0', g: 'lasagna' },
+];
+const rad = (d) => (d - 90) * Math.PI / 180;
+function wheelSVG() {
+  const cx = 150, cy = 150, R = 140, n = WHEEL.length, a = 360 / n;
+  let out = `<svg viewBox="0 0 300 300" width="300" height="300" class="rotsvg">`;
+  WHEEL.forEach((w, i) => {
+    const a0 = i * a, a1 = (i + 1) * a;
+    const x0 = cx + R * Math.cos(rad(a0)), y0 = cy + R * Math.sin(rad(a0));
+    const x1 = cx + R * Math.cos(rad(a1)), y1 = cy + R * Math.sin(rad(a1));
+    out += `<path d="M${cx} ${cy} L${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${w.c}" stroke="var(--outline)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    const mid = a0 + a / 2, r = 92;
+    const tx = cx + r * Math.cos(rad(mid)), ty = cy + r * Math.sin(rad(mid));
+    const rot = mid < 180 ? mid - 90 : mid + 90;
+    out += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" transform="rotate(${rot.toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)})" text-anchor="middle" dominant-baseline="central" font-family="Nunito" font-weight="800" font-size="16" fill="${w.dark ? '#FFFFFF' : '#172B70'}">${w.l}</text>`;
+  });
+  out += `<circle cx="150" cy="150" r="140" fill="none" stroke="var(--outline)" stroke-width="5"/><circle cx="150" cy="150" r="20" fill="#FFE680" stroke="var(--outline)" stroke-width="3"/></svg>`;
+  return out;
+}
+const COVERS = ['var(--sea-tint)', 'var(--gelato-tint)', 'var(--citrus-tint)', 'var(--amalfi-tint)'];
+
+/* ---------- scenes ---------- */
+const SCENES = [
+/* 1 */ {
+  name: 'Sign in', short: 'Sign in',
+  async run(c) {
+    c.theme('light'); c.callout('Open sign-up on a private app.', 'A registration code, user-only accounts.');
+    c.chrome({ bare: true });
+    c.set(`<div class="auth"><div class="sun">${icon('sun', 64)}</div>
+      <h1 class="big">for sneakypea.</h1><p class="tag">Every memory deserves a place to stay.</p>
+      <button class="abtn primary" id="goLogin" tabindex="-1">Log in</button>
+      <div class="logoBig">${LOGO}</div></div>`);
+    c.overlay('');
+    c.say('A private home for two. Sign-in is required.');
+    await c.wait(1200);
+    c.spot(c.q('#goLogin'));
+    await c.tap(c.q('#goLogin')); c.q('#goLogin').classList.add('press');
+    c.unspot();
+    await c.openSheet(`<h2>Welcome home</h2><p class="hint">Sign in to read it, love.</p>
+      <div class="f"><label>Username</label><input id="u" placeholder="Username" tabindex="-1" readonly></div>
+      <div class="f"><label>Password</label><input id="p" type="password" tabindex="-1" readonly></div>
+      <button class="abtn primary block" id="cont" tabindex="-1">Continue</button>
+      <p class="hint" style="margin:12px 0 0;text-align:center">No account yet? Enter the registration code you were given.</p>`);
+    c.say('Sign up needs a registration code.');
+    c.spot(c.q('#u').closest('.f'));
+    await c.tap(c.q('#u')); await c.type(c.q('#u'), 'alex');
+    c.spot(c.q('#p').closest('.f'));
+    await c.tap(c.q('#p')); await c.type(c.q('#p'), 'sunflower1');
+    c.spot(c.q('#cont'));
+    await c.tap(c.q('#cont')); c.q('#cont').classList.add('press');
+    await c.wait(250);
+    c.unspot();
+    await c.closeLayer();
+    c.chrome({ tab: 0 });
+    await c.fade(`<div class="hero2"><h1 class="h1">A quiet little <span class="mk">archive of us.</span></h1>
+      <p class="sub">Every memory, plan, and love note the two of you have kept, folded into one gentle place that only you can open.</p></div>
+      <div class="card hcard">${icon('wheel', 48)}<div><b>Spin the wheel</b><span>can't decide? let the wheel do it</span></div></div>
+      <div class="card hcard cit">${icon('dog', 48)}<div><b>Our little ones</b><span>Say hi to the pets</span></div></div>
+      <div class="card hcard">${icon('rose', 48)}<div><b>Bouquets</b><span>Make one, send one</span></div></div>`);
+    c.say('Signed in. Home opens.');
+    c.spot(c.q('.hero2'), 4);
+    await c.wait(2200);
+  },
+},
+/* 2 */ {
+  name: 'Memories', short: 'Memories',
+  async run(c) {
+    c.theme('light'); c.callout('Photos shared on public links.', 'Private Google Drive signed links.');
+    c.chrome({ tab: 1 }); c.overlay('');
+    const alb = [['Night market', 'camera', 0, '12'], ['First apartment', 'house', 1, '8'], ['Beach weekend', 'sun', 2, '5']];
+    c.set(`<h1 class="h1" style="font-size:2rem">Our memories</h1><p class="sub">every album is a little pocket of time</p>
+      <div class="searchrow"><input placeholder="Search albums or captions" tabindex="-1" readonly></div>
+      <div class="albums">${alb.map((a) => `<div class="card album" data-n="${a[0]}"><div class="cover" style="background:${COVERS[a[2]]}">${icon(a[1], 64)}</div><div class="meta"><b>${a[0]}</b><small>${a[3]} photos</small></div></div>`).join('')}
+      <div class="card album new">what are we keeping next?</div></div>`);
+    c.say('Every trip or moment gets its own album.');
+    c.spot(c.q('.albums'), 4);
+    await c.wait(1800);
+    const beach = c.q('[data-n="Beach weekend"]');
+    c.spot(beach);
+    await c.tap(beach);
+    await c.fade(`<div class="searchrow" style="align-items:center;justify-content:space-between"><span class="backbtn" style="min-height:40px">${chev}Albums</span><button class="abtn primary sm" id="add" tabindex="-1" style="min-height:44px">Add photos</button></div>
+      <h1 class="h1" style="font-size:1.9rem">Beach weekend</h1><p class="sub">Salt in our hair and sand in the car.</p>
+      <div class="photos" id="photos">${[['sun', 0], ['mountain', 1], ['plane', 2]].map((p) => `<div class="photo" style="background:${COVERS[p[1]]}">${icon(p[0], 44)}</div>`).join('')}</div>`);
+    c.say('Open an album to see its photos.');
+    c.unspot();
+    await c.wait(900);
+    c.spot(c.q('#add'));
+    await c.tap(c.q('#add')); c.q('#add').classList.add('press');
+    c.unspot();
+    await c.openSheet(`<h2>Add photos</h2><p class="hint">Pick several at once.</p>
+      <div class="f"><label>Caption</label><input id="cap" placeholder="e.g. Sunset in La Union" tabindex="-1" readonly></div>
+      <div class="f"><label>Location</label><input id="loc" placeholder="Where was this?" tabindex="-1" readonly></div>
+      <button class="abtn primary block" id="up" tabindex="-1">Upload</button>`);
+    c.say('Add several photos at once, with a caption.');
+    await c.tap(c.q('#cap')); await c.type(c.q('#cap'), 'Sunset at the pier');
+    await c.tap(c.q('#loc')); await c.type(c.q('#loc'), 'La Union');
+    c.spot(c.q('#up'));
+    await c.tap(c.q('#up')); c.q('#up').classList.add('press');
+    c.unspot();
+    await c.closeLayer();
+    const ph = c.q('#photos');
+    [['cake', 3], ['coffee', 0], ['moon', 1]].forEach((p) => ph.insertAdjacentHTML('beforeend', `<div class="photo add" style="background:${COVERS[p[1]]}">${icon(p[0], 44)}</div>`));
+    c.say('New photos land in the album.');
+    c.spot(ph, 4);
+    await c.wait(2400);
+  },
+},
+/* 3 */ {
+  name: 'Dates', short: 'Dates',
+  async run(c) {
+    c.theme('light'); c.callout('', '');
+    c.chrome({ tab: 2 }); c.overlay('');
+    const cards = [['Baguio roadtrip', 'dreaming', 'Dreaming', 'Oct 24', 0.15], ['Anniversary dinner', 'booked', 'Booked', 'Nov 02', 0.6], ['Pottery class', 'planning', 'Planning', 'Dec 12', 0.35]];
+    c.set(`<h1 class="h1" style="font-size:1.9rem">Dates &amp; roadtrips</h1><p class="sub">everything we still want to do (and eat)</p>
+      ${cards.map((d, i) => `<div class="card dcard" data-i="${i}"><div class="row"><b>${d[0]}</b><span class="chip ${d[1]}">${d[2]}</span></div><p class="meta">${d[3]}</p><div class="prog"><i style="transform:scaleX(${d[4]})"></i></div></div>`).join('')}`);
+    c.say('Every plan has a status, from Dreaming to Ready.');
+    c.spot(c.q('.dcard .chip'));
+    await c.wait(2000);
+    c.spot(c.q('[data-i="0"]'));
+    await c.tap(c.q('[data-i="0"]'));
+    c.unspot();
+    layer.style.pointerEvents = 'auto';
+    c.overlay(`<div class="scrim"></div><div class="drawer"><span class="chip dreaming">Dreaming</span><h2>Baguio roadtrip</h2>
+      <p class="sub" style="margin:0 0 12px">Notes: pine trees, strawberry taho, early start.</p>
+      ${['Book the stay', 'Plan the playlist', 'Fill the tank'].map((s, i) => `<div class="step" data-s="${i}"><span class="cb">${tick}</span><span>${s}</span></div>`).join('')}
+      <div class="allDone" id="allDone">Every step is done!</div></div>`);
+    void layer.offsetWidth;
+    layer.querySelector('.scrim').classList.add('in'); layer.querySelector('.drawer').classList.add('in');
+    c.say('Break each plan into steps.');
+    await c.wait(1100);
+    for (let i = 0; i < 3; i++) {
+      const st = c.q(`[data-s="${i}"]`);
+      c.spot(st);
+      await c.tap(st); st.classList.add('done');
+      await c.wait(350);
+      if (i === 0) c.say('Tick them off as you go.');
+    }
+    c.q('#allDone').classList.add('in');
+    c.say('Every step is done. Ready to go.');
+    c.spot(c.q('#allDone'));
+    await c.wait(2300);
+    c.unspot();
+    await c.closeLayerDrawer();
+  },
+},
+/* 4 */ {
+  name: 'Love Board', short: 'Board',
+  async run(c) {
+    c.theme('light'); c.callout('', '');
+    c.chrome({ mode: 'back', title: 'Our love board', tab: 3 }); c.overlay('');
+    c.set(`<div class="lb" id="lb">
+      <div class="paper" style="left:62px;top:28px;background:var(--gelato-tint);transform:rotate(-3deg)"><i class="tape"></i>Pick up the tickets after work.<small>From Sam</small></div>
+      <div class="paper" style="left:208px;top:150px;background:var(--sea-tint);transform:rotate(3deg);width:140px"><i class="tape"></i>Pottery on Saturday?<small>From Alex</small></div>
+      <div class="lbtools"><span class="round" id="stk" aria-hidden="true">${icon('sparkle', 28)}</span></div>
+      <span class="fab" id="write">Write a letter</span></div>`);
+    c.say('A paper board for notes and little letters.');
+    c.spot(c.q('#lb'), 2);
+    await c.wait(2200);
+    c.spot(c.q('#write'));
+    await c.tap(c.q('#write'));
+    c.unspot();
+    await c.openSheet(`<h2>Write a letter</h2><p class="hint">Pick the paper, then write.</p>
+      <div class="paperPick"><span class="sw" style="background:var(--gelato-tint)"></span><span class="sw sel" style="background:var(--citrus-tint)"></span><span class="sw" style="background:var(--sea-tint)"></span></div>
+      <div class="f"><label>To</label><input id="to" placeholder="To" tabindex="-1" readonly></div>
+      <div class="f"><label>Write something sweet</label><textarea id="msg" tabindex="-1" readonly></textarea></div>
+      <button class="abtn primary block" id="pin" tabindex="-1">Pin to the board</button>`);
+    c.say('Choose paper, then write the note.');
+    await c.tap(c.q('#to')); await c.type(c.q('#to'), 'Sam');
+    await c.tap(c.q('#msg')); await c.typeTA(c.q('#msg'), 'Left you a snack in the fridge. Eat it before the dog does.');
+    c.spot(c.q('#pin'));
+    await c.tap(c.q('#pin')); c.q('#pin').classList.add('press');
+    c.unspot();
+    await c.closeLayer();
+    c.q('#lb').insertAdjacentHTML('beforeend', `<div class="paper new" style="left:36px;top:300px;width:170px;background:var(--citrus-tint);transform:rotate(-2deg)"><i class="tape"></i>Left you a snack in the fridge. Eat it before the dog does.<small>To Sam</small></div>`);
+    c.say('The note is pinned to the board.');
+    c.spot(c.q('.paper.new'));
+    await c.wait(1800);
+    c.spot(c.q('#stk'));
+    await c.tap(c.q('#stk'));
+    c.q('#lb').insertAdjacentHTML('beforeend', `<div class="sticker" style="left:164px;top:290px">${icon('heart', 56, { sticker: true, tilt: 8 })}</div>`);
+    c.say('Add stickers on top.');
+    await c.wait(2200);
+  },
+},
+/* 5 */ {
+  name: 'Spin the wheel', short: 'Wheel',
+  async run(c) {
+    c.theme('light'); c.callout('', '');
+    c.chrome({ mode: 'back', title: 'Spin the wheel', tab: -1 }); c.overlay('');
+    c.set(`<div class="pills"><span class="pill2 on">Where to eat?</span><span class="pill2">Where to go?</span></div><p class="sub" style="margin:4px 0 8px">can't decide? let the wheel do it</p>
+      <div class="wheelWrap"><span class="pointer"><svg width="32" height="40" viewBox="0 0 32 40"><path d="M16 38 L3 8 Q16 -2 29 8 Z" fill="#E0301A" stroke="var(--outline)" stroke-width="3" stroke-linejoin="round"/></svg></span><div class="rot" id="rot">${wheelSVG()}</div></div>
+      <button class="abtn primary block" id="spin" tabindex="-1">Spin the wheel</button>`);
+    c.say('Each wheel holds up to 12 choices.');
+    c.spot(c.q('.wheelWrap'), 4);
+    await c.wait(2000);
+    c.spot(c.q('#spin'));
+    await c.tap(c.q('#spin')); c.q('#spin').classList.add('press');
+    c.unspot();
+    const rot = c.q('#rot');
+    const k = 1, final = 360 * 5 + (360 - (k * 60 + 30));
+    c.say('Spin it. No more arguing.');
+    rot.style.transition = REDUCED ? 'none' : 'transform 3.6s cubic-bezier(.1,.7,.1,1)';
+    void rot.offsetWidth;
+    rot.style.transform = `rotate(${final}deg)`;
+    await c.wait(3900);
+    layer.style.pointerEvents = 'auto';
+    c.overlay(`<div class="scrim"></div><div class="center" id="res">${icon('ramen', 96, { sticker: true, tilt: -4 })}
+      <p class="lead">Where to eat? gets…</p><h2 class="result">Ramen</h2>
+      <div class="row2"><span class="abtn">Spin again</span><span class="abtn primary">Let's go</span></div></div>`);
+    void layer.offsetWidth;
+    layer.querySelector('.scrim').classList.add('in'); layer.querySelector('#res').classList.add('in');
+    c.say('The wheel picks. The result shows.');
+    await c.wait(2600);
+    await c.closeLayer();
+  },
+},
+/* 6 */ {
+  name: 'Bouquet maker', short: 'Bouquet',
+  async run(c) {
+    c.theme('light'); c.callout('', '');
+    c.chrome({ mode: 'back', title: 'Bouquet', tab: -1 }); c.overlay('');
+    const bq = `<div class="card bq" id="bq">
+      <svg class="wrapsvg" width="358" height="150" viewBox="0 0 358 150"><path d="M89 10 L269 10 L215 138 Q179 148 143 138 Z" fill="var(--gelato-tint)" id="wrapP" stroke="var(--outline)" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M132 62 Q179 76 226 62 L222 84 Q179 98 136 84 Z" id="ribP" fill="var(--tomato)" stroke="var(--outline)" stroke-width="3" stroke-linejoin="round"/></svg></div>`;
+    const tabs = (on) => `<div class="tabs2" id="tabs">${['Wrap', 'Ribbon', 'Flowers', 'Card'].map((t, i) => `<span class="${i === on ? 'on' : ''}" data-t="${i}">${t}</span>`).join('')}</div>`;
+    const sw = (arr, sel) => `<div class="swatches" id="sws">${arr.map((a, i) => `<span class="swc ${i === sel ? 'sel' : ''}" data-c="${a}" style="background:${a}"></span>`).join('')}</div>`;
+    const flowers = [['rose', 'Rose'], ['sunflower', 'Sunflower'], ['daisy', 'Daisy'], ['tulip', 'Tulip'], ['leaf', 'Leaf'], ['fern', 'Fern'], ['eucalyptus', 'Eucalyptus'], ['lily', 'Lily']];
+    c.set(`<div class="f" style="margin-bottom:8px"><input id="nm" value="For Sam" aria-label="Bouquet name" tabindex="-1" readonly style="font-weight:800"></div>${bq}
+      <div id="tray">${tabs(0)}${sw(['var(--gelato-tint)', 'var(--sea-tint)', 'var(--citrus-tint)', 'var(--amalfi-tint)'], 0)}</div>`);
+    c.say('Pick a wrap, flowers and a ribbon.');
+    c.spot(c.q('#bq'), 2);
+    await c.wait(1800);
+    c.spot(c.q('#sws'));
+    const sws = c.q('#sws').children;
+    await c.tap(sws[1]);
+    c.q('#wrapP').setAttribute('fill', 'var(--sea-tint)');
+    [...sws].forEach((s, i) => s.classList.toggle('sel', i === 1));
+    await c.wait(700);
+    c.say('Choose the wrap paper.');
+    await c.tap(c.q('[data-t="2"]'));
+    c.q('#tray').innerHTML = `${tabs(2)}<div class="tray" id="tiles">${flowers.map((f) => `<div class="tile" data-f="${f[0]}">${icon(f[0], 40)}${f[1]}</div>`).join('')}</div><p class="hintline" id="full">That's a full bouquet, love.</p>`;
+    c.say('Tap a flower to add it.');
+    const slots = [['rose', 134, 82], ['sunflower', 206, 70], ['daisy', 170, 22], ['tulip', 92, 104], ['leaf', 252, 106]];
+    for (const s of slots) {
+      const t = c.q(`[data-f="${s[0]}"]`);
+      c.spot(t);
+      await c.tap(t);
+      c.q('#bq').insertAdjacentHTML('beforeend', `<span class="fl" style="left:${s[1]}px;top:${s[2]}px">${icon(s[0], 84)}</span>`);
+      await c.wait(380);
+    }
+    c.unspot();
+    c.q('#full').classList.add('in');
+    await c.wait(1100);
+    await c.tap(c.q('[data-t="1"]'));
+    c.q('#tray').innerHTML = `${tabs(1)}${sw(['#E0301A', '#5CB3FF', '#FF9F1C', '#1F55C9'], 0)}`;
+    c.spot(c.q('#sws'));
+    c.say('Finish with a ribbon, then save it.');
+    const sw2 = c.q('#sws').children;
+    await c.tap(sw2[3]);
+    c.q('#ribP').setAttribute('fill', '#1F55C9');
+    [...sw2].forEach((s, i) => s.classList.toggle('sel', i === 3));
+    c.spot(c.q('#bq'), 2);
+    await c.wait(2600);
+  },
+},
+/* 7 */ {
+  name: 'Pets and dark mode', short: 'Pets',
+  async run(c) {
+    c.theme('light'); c.callout('', '');
+    c.chrome({ mode: 'back', title: 'Our little ones', tab: -1 }); c.overlay('');
+    c.set(`<div class="card room" id="room"><span class="floor"></span><span class="bubble" id="bub">${icon('bowl', 26)}</span><span class="food" id="food">${icon('cookie', 40)}</span><span class="petwrap">${icon('dog', 170)}</span></div>
+      <h2 style="margin:0 0 2px;font-family:var(--font-heading);font-weight:800;font-size:1.5rem">Mochi</h2>
+      <p class="sub" id="mood" style="margin:0 0 12px">Mochi is a little peckish.</p>
+      <div class="meter">${icon('bowl', 24)}<span>Fullness</span><span class="trk"><i id="m1" style="transform:scaleX(.24)"></i></span><em id="w1">peckish</em></div>
+      <div class="meter">${icon('bed', 24)}<span>Energy</span><span class="trk"><i style="transform:scaleX(.52)"></i></span><em>calm</em></div>
+      <div class="meter">${icon('heart', 24)}<span>Joy</span><span class="trk"><i style="transform:scaleX(.55)"></i></span><em>content</em></div>
+      <div class="acts"><span class="abtn" id="feed">Feed</span><span class="abtn">Play</span><span class="abtn">Hug</span><span class="abtn">Walk</span></div>`);
+    c.say('Pets show a mood based on how they are cared for.');
+    c.spot(c.q('#room'), 2);
+    await c.wait(2400);
+    c.spot(c.q('#feed'));
+    await c.tap(c.q('#feed'));
+    c.unspot();
+    c.q('#food').classList.add('go');
+    const bub = c.q('#bub');
+    bub.classList.add('off'); await c.wait(500);
+    bub.textContent = 'nom nom'; bub.classList.remove('off');
+    c.q('#m1').style.transform = 'scaleX(.58)'; c.q('#w1').textContent = 'fine';
+    c.q('#mood').textContent = 'Mochi is having a good day.';
+    c.say('Feed it. The mood and meters update.');
+    c.spot(c.q('#m1').parentElement, 6);
+    await c.wait(2600);
+    c.unspot();
+    const av = c.q('#avatar');
+    await c.tap(av);
+    layer.style.pointerEvents = 'auto';
+    c.overlay(`<div class="menu" id="menu"><p>Alex</p><div class="mi">Profile</div><div class="themes"><span class="round sel" id="tl">${icon('sun', 30)}</span><span class="round" id="td">${icon('moon', 30)}</span><span class="round" id="ts"><span style="display:inline-flex">${icon('sun', 18)}${icon('moon', 18)}</span></span></div><div class="mi">Sign out</div></div>`);
+    void layer.offsetWidth; c.q('#menu').classList.add('in');
+    c.say('Switch between light and dark.');
+    await c.wait(900);
+    c.spot(c.q('#td'));
+    await c.tap(c.q('#td'));
+    c.theme('dark');
+    c.q('#tl').classList.remove('sel'); c.q('#td').classList.add('sel');
+    await c.wait(2800);
+    c.unspot();
+    await c.closeLayer();
+  },
+},
+];
+
+/* closeLayer variant for the Dates drawer */
+ctx.closeLayerDrawer = async function () {
+  const d = layer.querySelector('.drawer');
+  layer.querySelector('.scrim')?.classList.remove('in');
+  if (d) d.classList.remove('in');
+  await wait(450); layer.innerHTML = ''; layer.style.pointerEvents = 'none';
+};
+
+/* ---------- player ---------- */
+const dots = $('#dots'), count = $('#count'), playBtn = $('#play'), bar = $('#barFill');
+SCENES.forEach((s, i) => {
+  const li = document.createElement('li');
+  li.innerHTML = `<button class="dot" type="button" aria-label="Scene ${i + 1}: ${s.name}"><i></i><span>${s.short}</span></button>`;
+  li.firstChild.addEventListener('click', () => go(i));
+  dots.appendChild(li);
+});
+function refreshDots() {
+  [...dots.children].forEach((li, i) => {
+    const b = li.firstChild;
+    b.setAttribute('aria-current', i === cur ? 'true' : 'false');
+    b.classList.toggle('done', i < cur);
+  });
+  count.textContent = `${cur + 1} / ${SCENES.length}`;
+  eyeEl.textContent = `Scene ${cur + 1} of ${SCENES.length}`;
+  titleEl.textContent = SCENES[cur].name;
+}
+function resetStage() {
+  spot.classList.remove('on'); cursor.classList.remove('on', 'down');
+  layer.innerHTML = ''; layer.style.pointerEvents = 'none';
+  view.style.opacity = '1'; app.classList.remove('bare');
+  steps = []; capEl.textContent = ''; capEl.hidden = false; stepList.hidden = true;
+  setCallout('', '');
+  bar.style.transition = 'none'; bar.style.transform = 'scaleX(0)';
+}
+async function play(i) {
+  const my = ++token; cur = i; running = true;
+  resetStage(); refreshDots();
+  try {
+    await SCENES[i].run(ctx);
+    if (my !== token) return;
+    running = false;
+    if (REDUCED || !autoplay) return;
+    await wait(600);
+    go((cur + 1) % SCENES.length);
+  } catch (e) {
+    if (e !== CANCEL) console.error(e);
+  }
+}
+function go(i) { play((i + SCENES.length) % SCENES.length); }
+function setPaused(p) {
+  paused = p; userPaused = p; autoplay = !p && !REDUCED;
+  playBtn.setAttribute('aria-label', p ? 'Play' : 'Pause');
+  $('#playIcon').innerHTML = p ? '<path d="M7 3v18l14-9z"/>' : '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  if (!p && !running && !REDUCED) go(cur + 1);
+}
+$('#prev').addEventListener('click', () => go(cur - 1));
+$('#next').addEventListener('click', () => go(cur + 1));
+$('#replay').addEventListener('click', () => go(cur));
+playBtn.addEventListener('click', () => {
+  if (REDUCED) { go(cur + 1); return; }
+  setPaused(!paused);
+});
+if (REDUCED) { playBtn.setAttribute('aria-label', 'Next scene'); $('#playIcon').innerHTML = '<path d="M7 3v18l14-9z"/>'; }
+document.addEventListener('keydown', (e) => {
+  const t = e.target, tag = t && t.tagName;
+  if (e.key === 'ArrowLeft') { go(cur - 1); }
+  else if (e.key === 'ArrowRight') { go(cur + 1); }
+  else if (e.key === ' ' && tag !== 'BUTTON' && tag !== 'A' && tag !== 'INPUT') { e.preventDefault(); playBtn.click(); }
+});
+/* swipe */
+let sx = null, sy = null;
+stage.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; });
+stage.addEventListener('pointerup', (e) => {
+  if (sx === null) return;
+  const dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+});
+/* pause when scrolled off screen or tab hidden */
+document.addEventListener('visibilitychange', () => { paused = document.hidden || userPaused; });
+new IntersectionObserver((en) => { paused = !en[0].isIntersecting || userPaused; }, { threshold: 0.15 }).observe(stage);
+
+function boot() {
+  const n = parseInt((location.hash.match(/scene-(\d+)/) || [])[1], 10);
+  const run = () => { layout(); play(n >= 1 && n <= SCENES.length ? n - 1 : 0); };
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(run); else run();
+}
+boot();
+})();
+</script>
+</body>
+</html>

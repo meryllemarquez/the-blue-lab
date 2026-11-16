@@ -50,7 +50,6 @@ const WORKS = {
   ],
   merch: [
     { src: 'images/merch/lanyard-1.webp' },
-    { src: 'images/merch/logo-alt.svg' },
     { src: 'images/merch/marquez-poloshirt-entry.webp' },
   ],
   infographics: [
@@ -66,12 +65,13 @@ const WORKS = {
    and ONE video source:
      video: { youtube: 'VIDEO_ID' }                   ← the part after watch?v=
      video: { mp4: 'videos/site-1.mp4', poster: 'images/web/site-1.webp' }
+     video: { page: 'walkthroughs/site/index.html' }  ← an interactive walkthrough page, embedded
      video: null                                      ← shows "coming soon"
    --------------------------------------------------------- */
 const WALKTHROUGHS = [
-  { name: '[SITE 01 NAME]', blurb: '[One line about what this site does]', url: '', video: null },
-  { name: '[SITE 02 NAME]', blurb: '[One line about what this site does]', url: '', video: null },
-  { name: '[SITE 03 NAME]', blurb: '[One line about what this site does]', url: '', video: null },
+  { name: 'TindaTrack', blurb: 'A custom-built store management app for a sari-sari store: selling, stock, utang and the cash drawer.', url: '', video: { page: 'walkthroughs/tindatrack/index.html' } },
+  { name: 'On The Water', blurb: 'A shared gala planner for RSVPs, route, costs, chat and photos.', url: 'https://otw.vinnn.app', video: { page: 'walkthroughs/on-the-water/index.html' } },
+  { name: 'for sneakypea', blurb: 'A private web app where a couple keeps memories, plans and love notes.', url: 'https://forsneakypea.vercel.app', video: { page: 'walkthroughs/forsneakypea/index.html' } },
 ];
 
 /* =========================================================
@@ -79,7 +79,6 @@ const WALKTHROUGHS = [
    ========================================================= */
 const ACCENTS = ['var(--blue)', 'var(--gold)', '#7d929e'];
 const TILES = ['#ffffff', 'var(--gold)', '#dbd4cc'];
-const TILT = ['-1.5deg', '1.2deg', '-.8deg', '1.6deg', '1deg', '-1.6deg', '1.3deg', '-1deg'];
 
 // how each edition frames its pieces — `ratio` reserves the space while the image loads
 const STYLE = {
@@ -100,7 +99,7 @@ function figureFor(key, item, i) {
   const label = item.cap || nameFromFile(item.src);
   const fig = document.createElement('figure');
   fig.className = 'stamp';
-  fig.style.cssText = `margin:0;animation-delay:${(0.45 + i * 0.09).toFixed(2)}s;--r:${TILT[i % TILT.length]}`;
+  fig.style.cssText = `margin:0;animation-delay:${(0.45 + i * 0.09).toFixed(2)}s`;
 
   // the slot keeps its shape and shows a halftone shimmer until the image arrives
   const slot = document.createElement('div');
@@ -118,7 +117,13 @@ function figureFor(key, item, i) {
   if (location.protocol.startsWith('http')) {
     fetch(item.src, { method: 'HEAD' }).then((r) => { if (!r.ok) drop(); }).catch(() => {});
   }
-  slot.appendChild(img);
+  const zoom = document.createElement('button');
+  zoom.type = 'button';
+  zoom.className = 'zoom';
+  zoom.dataset.zoom = '';
+  zoom.setAttribute('aria-label', `View ${label} full size`);
+  zoom.appendChild(img);
+  slot.appendChild(zoom);
 
   let holder = slot;
   if (s.tile) {
@@ -129,11 +134,7 @@ function figureFor(key, item, i) {
     fig.style.cssText += `;background:#fff;padding:8px;border:2.5px solid #3e251e;border-radius:12px;box-shadow:5px 5px 0 ${ACCENTS[i % ACCENTS.length]}`;
   }
 
-  const cap = document.createElement('figcaption');
-  cap.style.cssText = "margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase";
-  cap.textContent = `[${pad(i + 1)}] ${label}`;
-
-  fig.append(holder, cap);
+  fig.append(holder);
   return fig;
 }
 
@@ -208,6 +209,44 @@ document.addEventListener('click', (e) => {
   if (a.dataset.action === 'reset-coupon') showCoupon(false);
 });
 
+
+/* ---- full view (watermark is drawn over the image in css/style.css) ---- */
+const lb = document.getElementById('lightbox');
+const lbImg = document.getElementById('lb-img');
+let lbList = [];
+let lbIdx = 0;
+
+function lbShow(step = 0) {
+  if (!lbList.length) return;
+  lbIdx = (lbIdx + step + lbList.length) % lbList.length;
+  const src = lbList[lbIdx];
+  lbImg.src = src.currentSrc || src.src;
+  lbImg.alt = src.alt;
+  lb.querySelectorAll('.lb-prev,.lb-next').forEach((b) => { b.hidden = lbList.length < 2; });
+}
+
+document.addEventListener('click', (e) => {
+  const z = e.target.closest('[data-zoom]');
+  if (z) {
+    const grid = z.closest('[data-grid]');
+    lbList = grid ? [...grid.querySelectorAll('[data-zoom] img')] : [z.querySelector('img')];
+    lbIdx = Math.max(0, lbList.indexOf(z.querySelector('img')));
+    lbShow();
+    lb.showModal();
+    return;
+  }
+  const b = e.target.closest('[data-lb]');
+  if (b) { const a = b.dataset.lb; if (a === 'close') lb.close(); else lbShow(a === 'next' ? 1 : -1); return; }
+  if (e.target === lb) lb.close();
+});
+lb.addEventListener('contextmenu', (e) => e.preventDefault());
+lb.addEventListener('close', () => { lbImg.removeAttribute('src'); });
+document.addEventListener('keydown', (e) => {
+  if (!lb.open) return;
+  if (e.key === 'ArrowRight') lbShow(1);
+  if (e.key === 'ArrowLeft') lbShow(-1);
+});
+
 /* ---- web desk walkthroughs ---- */
 function renderWalkthroughs() {
   const wrap = document.querySelector('[data-walkthroughs]');
@@ -228,7 +267,13 @@ function renderWalkthroughs() {
     media.className = 'walk-media';
     media.style.cssText = 'aspect-ratio:16/9;border-bottom:3px solid #3e251e;position:relative';
     const v = site.video;
-    if (v && v.youtube) {
+    if (v && v.page) {
+      const f = document.createElement('iframe');
+      f.src = v.page;
+      f.title = `Walkthrough of ${site.name}`;
+      f.loading = 'lazy';
+      media.appendChild(f);
+    } else if (v && v.youtube) {
       const f = document.createElement('iframe');
       f.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.youtube)}`;
       f.title = `Walkthrough of ${site.name}`;
@@ -262,24 +307,33 @@ function renderWalkthroughs() {
     blurb.style.cssText = 'margin:0;font-size:15.5px;line-height:1.45;flex:1';
     blurb.textContent = site.blurb;
     body.append(kicker, title, blurb);
-    if (site.url) {
-      const link = document.createElement('a');
-      link.href = site.url;
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.textContent = 'Visit the site ↗';
-      link.style.cssText = 'align-self:flex-start;margin-top:8px;display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:2.5px solid #3e251e;border-radius:999px;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none';
-      body.appendChild(link);
+    const BTN = 'display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:2.5px solid #3e251e;border-radius:999px;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none';
+    const links = [];
+    if (site.video && site.video.page) links.push(['Open full walkthrough ↗', site.video.page]);
+    if (site.url && !(site.video && site.video.page === site.url)) links.push(['Visit the site ↗', site.url]);
+    if (links.length) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;margin-top:8px';
+      links.forEach(([text, href]) => {
+        const link = document.createElement('a');
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = text;
+        link.style.cssText = BTN;
+        row.appendChild(link);
+      });
+      body.appendChild(row);
     }
     card.append(bar, media, body);
     wrap.appendChild(card);
   });
 }
 
-/* ---- commission coupon (Formspree) ----
-   1. Make a free form at formspree.io
-   2. Replace YOUR_FORM_ID in index.html (the <form action="…">) with your form's ID.
-   Until then the button shows the "Received!" stamp without sending anything. */
+/* ---- commission coupon (Formspree: formspree.io/f/maeoejoq) ----
+   Replies go to the Formspree inbox. Every booking also gets a random
+   6-character ticket code (saved in the submission as `ticket_code`)
+   that earns 5% off the next commission once the booking is ₱500+. */
 function showCoupon(done) {
   const form = document.getElementById('coupon-form');
   const thanks = document.getElementById('coupon-done');
@@ -288,22 +342,48 @@ function showCoupon(done) {
   thanks.hidden = !done;
 }
 
+// no 0/O/1/I so a screenshot is never misread
+function makeTicketCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('');
+}
+
+function showTicket(code, name) {
+  const dlg = document.getElementById('ticket-dialog');
+  if (!dlg) return;
+  document.getElementById('ticket-code').textContent = code;
+  const date = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+  document.getElementById('ticket-meta').textContent = `${name ? name + ' · ' : ''}${date}`;
+  dlg.showModal();
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-ticket="close"]')) document.getElementById('ticket-dialog').close();
+});
+
 function wireCoupon() {
   const form = document.getElementById('coupon-form');
   if (!form) return;
   const err = document.getElementById('coupon-error');
+  const btn = form.querySelector('button[type=submit]');
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.checkValidity()) { form.reportValidity(); return; }
     if (err) err.hidden = true;
-    if (form.action.includes('YOUR_FORM_ID')) { showCoupon(true); return; }
+    const code = makeTicketCode();
+    document.getElementById('f-ticket').value = code;
+    const name = form.elements.name.value.trim();
+    if (btn) btn.disabled = true;
     try {
       const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error(res.status);
       form.reset();
       showCoupon(true);
+      showTicket(code, name);
     } catch {
       if (err) err.hidden = false;
+    } finally {
+      if (btn) btn.disabled = false;
     }
   });
 }

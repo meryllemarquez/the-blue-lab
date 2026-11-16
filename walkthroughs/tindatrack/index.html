@@ -1,0 +1,826 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TindaTrack: Product Walkthrough</title>
+<meta name="description" content="A guided tour of TindaTrack, a custom-built store management app for a sari-sari store: selling, stock, utang and the cash drawer.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TindaTrack: Product Walkthrough">
+<meta property="og:description" content="A guided tour of TindaTrack, a custom-built store management app for a sari-sari store: selling, stock, utang and the cash drawer.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230E7C3A'/%3E%3Cpath d='M16 13H48L52 25a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0Z' fill='%23fff'/%3E%3Cpath d='M22 43l8 8 14-15' fill='none' stroke='%23fff' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>
+/* Tokens copied from src/app/globals.css (@theme) */
+:root{
+  --primary:#0e7c3a; --primary-dark:#0a3d1f; --primary-tint:#e8f5ec;
+  --amber:#b84a00; --amber-tint:#fff1e0; --danger:#b3261e;
+  --bg:#f4f7f4; --ink:#14231a; --muted:#4a5a50; --line:#dce5de; --white:#fff;
+  --radius-card:1.25rem; --radius-control:1rem;
+  --font:Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:#04120a;color:var(--ink);font-family:var(--font);font-size:1rem;line-height:1.5;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- walkthrough chrome: one-screen, premium ---------- */
+html,body{height:100%}
+.x-bg{position:fixed;inset:0;z-index:0;background:radial-gradient(1100px 650px at 12% -10%,rgba(22,163,74,.5),transparent 62%),radial-gradient(900px 600px at 105% 110%,rgba(184,74,0,.24),transparent 60%),linear-gradient(160deg,#07200f,#04120a)}
+.x-app{position:relative;z-index:1;height:100vh;height:100dvh;display:flex;flex-direction:column;gap:clamp(8px,1.2vw,16px);padding:clamp(10px,1.5vw,22px);color:#eaf5ee}
+.x-top{display:flex;align-items:center;gap:12px;flex:none;min-height:40px}
+.x-top svg{flex:none}
+.x-name{font-size:1.15rem;font-weight:800;letter-spacing:-.01em;color:#fff}
+.x-tag{color:#9fc4ad;font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.x-sp{flex:1}
+.x-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:700;font-size:.9rem;transition:background .2s}
+.x-btn:hover{background:rgba(255,255,255,.15)}
+.x-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) clamp(320px,27vw,400px);gap:clamp(12px,1.6vw,24px)}
+.x-stage{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.device{flex:none}
+.device.desktop{border-radius:16px;border:1px solid rgba(255,255,255,.16);background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 90px rgba(22,163,74,.22);overflow:hidden}
+.device.phone{border-radius:38px;border:10px solid #0b1a11;background:#0b1a11;box-shadow:0 24px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.14),0 0 70px rgba(22,163,74,.25);overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;height:34px;padding:0 14px;background:#eef2ee;border-bottom:1px solid var(--line)}
+.bar i{width:11px;height:11px;border-radius:50%;background:#c7d2ca;display:block}
+.bar b{margin-left:10px;font-size:.8rem;color:var(--muted);font-weight:600}
+.device.phone .bar{display:none}
+.viewport{position:relative;overflow:hidden;touch-action:pan-y;background:var(--bg)}
+.canvas{position:absolute;left:0;top:0;transform-origin:0 0;overflow:hidden;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:18px;line-height:1.5}
+.x-panel{min-height:0;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 60px rgba(0,0,0,.35);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden}
+.x-hd{display:flex;flex-direction:column;gap:6px}
+.x-stephead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.x-step{font-size:.8rem;font-weight:800;letter-spacing:.14em;color:#6ee7a0}
+.x-live{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9fc4ad}
+.x-live i{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.x-title{font-size:clamp(1.6rem,2.4vw,2.1rem);line-height:1.1;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,#fff,#9be7bb);-webkit-background-clip:text;background-clip:text;color:transparent}
+.x-desc{color:#cfe5d6;font-size:.98rem;font-weight:500}
+.x-funcs{list-style:none;padding:0;display:grid;gap:8px}
+.x-funcs li{display:flex;gap:10px;align-items:flex-start;font-size:.92rem;font-weight:600;color:#e3f2e8;line-height:1.35}
+.x-funcs li::before{content:"";flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:#0e7c3a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E") center/11px no-repeat;box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.x-fill{flex:1;min-height:0}
+.caption{font-size:1rem;font-weight:700;color:#fff;min-height:2.9em;line-height:1.4}
+.callout{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:start;min-height:64px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:16px;padding:10px 14px;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.callout.on{opacity:1;transform:none}
+.callout b{font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:#ffb27a;background:rgba(255,170,90,.16);border-radius:999px;padding:3px 10px;margin-top:1px}
+.callout b.ok{color:#6ee7a0;background:rgba(110,231,160,.16)}
+.callout span{font-weight:600;font-size:.95rem;color:#f1faf4}
+.controls{display:flex;align-items:center;gap:8px}
+.cbtn{min-width:44px;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:#fff;font-weight:800;display:inline-flex;align-items:center;justify-content:center;transition:background .2s}
+.cbtn:hover{background:rgba(255,255,255,.16)}
+.cbtn.main{flex:1;background:linear-gradient(180deg,#16a34a,#0e7c3a);border-color:transparent;box-shadow:0 8px 20px rgba(14,124,58,.45)}
+.cbtn.main:hover{background:linear-gradient(180deg,#1bb255,#11893f)}
+.progress{height:4px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.progress i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#a7f3d0);transform-origin:0 0;transform:scaleX(0)}
+.dots{display:flex;gap:6px;list-style:none;padding:0}
+.dots li{flex:1}
+.dot{width:100%;min-height:28px;display:flex;align-items:center;justify-content:center;position:relative}
+.dot::before{content:"";width:100%;height:6px;border-radius:999px;background:rgba(255,255,255,.18);transition:background .3s}
+.dot:hover::before{background:rgba(255,255,255,.4)}
+.dot[aria-current="true"]::before{background:#22c55e}
+.x-modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:clamp(12px,3vw,40px);background:rgba(2,10,5,.7);backdrop-filter:blur(8px)}
+.x-modal.on{display:flex}
+.x-sheet{width:100%;max-width:960px;max-height:100%;overflow:auto;border-radius:24px;background:#0b2315;border:1px solid rgba(255,255,255,.16);padding:clamp(18px,3vw,32px);color:#eaf5ee;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.x-sheet h2{font-size:1.2rem;font-weight:800;margin:22px 0 12px;color:#fff}
+.x-shead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.x-shead h2{margin:0}
+.grid2{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));list-style:none;padding:0}
+.card2{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px 16px}
+.card2 h3{font-size:1rem;font-weight:800;color:#fff}
+.card2 p{color:#b9d3c2;margin-top:2px;font-size:.92rem}
+.pair{display:grid;gap:4px}
+.pair .iss{color:#ffb27a;font-weight:700;font-size:.92rem}
+.pair .sol{color:#6ee7a0;font-weight:700;font-size:.92rem}
+dl.spec{display:grid;grid-template-columns:minmax(0,8rem) minmax(0,1fr);gap:8px 16px;font-size:.92rem}
+dl.spec dt{font-weight:800;color:#fff}
+dl.spec dd{color:#b9d3c2;overflow-wrap:anywhere}
+.x-foot{margin-top:18px;color:#8fb09b;font-size:.85rem}
+@media (max-width:900px){
+  .x-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+  .x-panel{padding:12px 14px;gap:8px;border-radius:18px}
+  .x-hd{flex-direction:row;align-items:baseline;gap:10px}
+  .x-stephead{justify-content:flex-start}
+  .x-live,.x-desc,.x-funcs,.x-fill,.x-tag{display:none}
+  .x-title{font-size:1.2rem}
+  .caption{font-size:.92rem;min-height:2.6em}
+  .callout{min-height:54px;padding:8px 12px}
+  .callout span{font-size:.88rem}
+  .progress{display:none}
+}
+@media (max-width:400px){.controls{gap:6px}.cbtn{padding:0 10px;min-width:40px}}
+@media (max-width:340px){.controls{flex-wrap:wrap;justify-content:center}.x-top{gap:6px}.x-name{font-size:.95rem}.x-btn{padding:0 10px;font-size:.8rem;white-space:nowrap}.cbtn{min-height:38px}}
+@media (min-width:901px) and (max-height:820px){.x-desc{display:none}}
+@media (min-width:901px) and (max-height:660px){.x-funcs{display:none}}
+@media (max-width:640px){dl.spec{grid-template-columns:1fr}}
+
+/* ---------- recreated app (matches the real Tailwind output) ---------- */
+.app{display:flex;width:100%;height:100%;position:relative;background:var(--bg)}
+.sidebar{width:260px;flex:none;background:#fff;border-right:1px solid var(--line);padding:24px 16px;display:flex;flex-direction:column;justify-content:space-between}
+.sidebar .top>*+*{margin-top:32px}
+.sidebar .id{padding:0 8px}
+.sidebar .id>*+*{margin-top:4px}
+.brandrow{display:flex;align-items:center;gap:8px}
+.brandrow span{font-size:20px;line-height:28px;font-weight:800;color:var(--primary-dark)}
+.sname{font-size:15px;font-weight:600;color:var(--muted);padding-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat{display:inline-flex;align-items:center;gap:8px;min-height:44px;border-radius:999px;padding:0 16px;font-size:15px;font-weight:800;letter-spacing:.025em;color:#fff;background:var(--primary);margin-top:8px}
+.stat.closed{background:var(--amber)}
+.stat i{width:12px;height:12px;border-radius:50%;background:#fff;display:block}
+.navl{list-style:none;padding:0}.navl>li+li{margin-top:4px}
+.sl{display:flex;align-items:center;gap:12px;min-height:56px;border-radius:var(--radius-control);padding:0 16px;font-size:18px;line-height:28px;font-weight:700;color:var(--ink)}
+.sl.on{background:var(--primary-tint);color:var(--primary)}
+.sl svg{width:24px;height:24px;flex:none}
+.sidebar .bot{border-top:1px solid var(--line);padding-top:16px}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+.mhead{display:none;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px}
+.mhead .l{min-width:0;flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;min-height:44px;flex:none;border-radius:999px;border:2px solid var(--line);background:#fff;padding:0 16px;font-size:15px;font-weight:700;color:var(--ink)}
+.pill svg{width:20px;height:20px}
+.main{flex:1;overflow:hidden;position:relative}
+.page{width:100%;max-width:1100px;margin:0 auto;padding:40px;transition:transform var(--sc,.4s) ease;will-change:transform}
+.page>*+*{margin-top:24px}
+.bnav{display:none;height:84px;flex:none;border-top:1px solid var(--line);background:#fff;grid-template-columns:repeat(4,1fr);list-style:none;padding:0}
+.bnav li{display:flex}
+.bnav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:15px;font-weight:700;color:var(--muted);text-decoration:none}
+.bnav a.on{background:var(--primary-tint);color:var(--primary)}
+.bnav svg{width:28px;height:28px}
+/* phone layout (the app's own mobile layout, below 768px) */
+.phone .sidebar{display:none}
+.phone .app{flex-direction:column}
+.phone .mhead{display:flex}
+.phone .bnav{display:grid}
+.phone .page{padding:8px 16px 32px}
+
+h1.ph{font-size:30px;line-height:1.25;font-weight:800;color:var(--ink);overflow-wrap:anywhere}
+.hd>*+*{margin-top:8px}
+.sub{color:var(--muted)}
+.back{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:15px;font-weight:700;color:var(--primary-dark)}
+.back svg{width:20px;height:20px}
+.ico{display:inline-block;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:56px;padding:0 24px;border-radius:var(--radius-control);font-size:18px;line-height:28px;font-weight:700;background:var(--primary);color:#fff;border:2px solid transparent;max-width:28rem;text-align:center}
+.btn.sec{border-color:var(--primary);background:#fff;color:var(--primary-dark)}
+.btn.amber{background:var(--amber)}
+.btn.sm{min-height:44px;padding:0 16px;font-size:16px;line-height:24px}
+.btn.w{width:100%;max-width:none}
+.btn[disabled],.btn.dis{opacity:.6}
+.btn.press,.tile.press,.chipb.press,.choice.press{transform:scale(.97)}
+.card{border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:20px}
+.card>*+*{margin-top:16px}
+.h2{font-size:20px;line-height:28px;font-weight:800}
+.h2b{font-size:24px;line-height:32px;font-weight:800}
+.t15{font-size:15px}.bold{font-weight:700}.xbold{font-weight:800}.muted{color:var(--muted)}.pdk{color:var(--primary-dark)}.am{color:var(--amber)}
+.sum{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);list-style:none;padding:0}
+.sum li{margin:0}
+.sumc{display:block;height:100%;border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:16px;text-decoration:none}
+.two{display:grid;gap:24px;grid-template-columns:1fr 1fr}
+.two>*+*{margin-top:0}
+.rows{list-style:none;padding:0}.rows>li+li{margin-top:8px}
+.row{display:flex;min-height:56px;align-items:center;justify-content:space-between;gap:12px;border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:8px 16px}
+.sect>*+*{margin-top:12px}
+.tiles{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);list-style:none;padding:0}
+.tiles.t4{gap:16px}
+.ttile{display:flex;min-height:144px;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:12px;text-align:center;font-size:18px;line-height:28px;font-weight:700}
+.ttile .c{display:flex;width:56px;height:56px;align-items:center;justify-content:center;border-radius:50%;background:var(--primary-tint);color:var(--primary)}
+.ttile svg{width:32px;height:32px}
+.qs{display:grid;gap:16px;grid-template-columns:repeat(4,1fr);list-style:none;padding:0}
+.qcard{display:flex;height:100%;flex-direction:column;gap:12px;border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:16px}
+.qcard .n{font-size:18px;line-height:1.375;font-weight:800;overflow-wrap:anywhere}
+.qcard .info>*+*{margin-top:4px}
+.qcard .info{flex:1}
+.seelink{display:inline-flex;min-height:44px;align-items:center;font-weight:700;color:var(--primary-dark);text-decoration:underline}
+.between{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;padding:0;font-size:15px;font-weight:700}
+.legend li{display:flex;align-items:center;gap:8px}.legend svg{width:16px;height:16px}
+.field>*+*{margin-top:6px}
+.lbl{display:block;font-size:15px;font-weight:700}
+.input{display:flex;align-items:center;width:100%;height:56px;border-radius:var(--radius-control);border:2px solid var(--line);background:#fff;padding:0 16px;font-size:20px;line-height:28px;color:var(--ink);overflow:hidden;white-space:nowrap}
+.input.big{height:64px;font-size:30px;line-height:36px;font-weight:800}
+.input.foc{border-color:var(--primary)}
+.input .ph2{color:var(--muted)}
+.input .caret{display:none;width:2px;height:60%;background:var(--ink);margin-left:1px}
+.input.foc .caret{display:inline-block}
+.textarea{height:112px;align-items:flex-start;padding-top:12px;white-space:normal}
+.hint{font-size:15px;color:var(--muted)}
+.counter{text-align:right;font-size:15px;color:var(--muted)}
+.chiprow{display:flex;gap:8px;flex-wrap:wrap}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{display:inline-flex;min-height:44px;align-items:center;border-radius:999px;border:2px solid var(--line);background:#fff;padding:0 20px;font-size:16px;line-height:24px;font-weight:700;color:var(--ink)}
+.tab.on{border-color:var(--primary);background:var(--primary);color:#fff}
+.chipb{display:inline-flex;min-height:44px;flex:none;align-items:center;border-radius:999px;border:2px solid var(--line);background:#fff;padding:0 20px;font-size:16px;line-height:24px;font-weight:700;color:var(--ink)}
+.chipb.on{border-color:var(--primary);background:var(--primary);color:#fff}
+.catrow{display:flex;gap:8px;overflow:hidden}
+.svgrid{display:grid;gap:24px;grid-template-columns:1fr 22rem}
+.svgrid>*+*{margin-top:0}
+.tgrid{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);list-style:none;padding:0}
+.tile{display:flex;min-height:112px;width:100%;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;border-radius:var(--radius-card);border:2px solid var(--primary);background:#fff;padding:12px;text-align:left;color:var(--ink)}
+.tile .n{font-size:18px;line-height:1.375;font-weight:800;overflow-wrap:anywhere}
+.tile .p{font-size:15px;font-weight:700}
+.tile .s{font-size:15px;color:var(--muted)}
+.tile.out{border-color:var(--line);background:var(--bg);color:var(--muted);opacity:.6}
+.cart{align-self:start;border-radius:var(--radius-card);border:2px solid var(--primary);background:#fff}
+.cart .hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 0}
+.cart .cbtnm{display:none;min-height:44px;align-items:center;font-size:18px;line-height:28px;font-weight:800}
+.cart .list{max-height:55dvh;padding:8px 16px 0;overflow:hidden}
+.cart .list ul{list-style:none;padding:0;margin:0;padding:8px 0}
+.cart .list ul>li+li{margin-top:12px}
+.cart .foot2{padding:16px}
+.cart .foot2>*+*{margin-top:12px}
+.cart .btns{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+.line{border-radius:var(--radius-card);border:2px solid var(--line);background:#fff;padding:12px}
+.line>*+*{margin-top:8px}
+.line .top2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.line .nm{font-size:18px;line-height:1.375;font-weight:800;overflow-wrap:anywhere}
+.line .qt{display:flex;align-items:center;gap:12px}
+.step{display:inline-flex;width:56px;height:56px;align-items:center;justify-content:center;border-radius:var(--radius-control);border:2px solid var(--primary);background:#fff;font-size:30px;line-height:36px;font-weight:800;color:var(--primary-dark)}
+.step.dis{opacity:.4}
+.qn{min-width:40px;text-align:center;font-size:24px;line-height:32px;font-weight:800}
+.phone .svgrid{grid-template-columns:1fr;padding-bottom:170px}
+.phone .cart{position:absolute;left:0;right:0;bottom:0;z-index:20;border-radius:0;border-width:2px 0 0 0;box-shadow:0 -10px 30px rgba(20,35,26,.2)}
+.phone .cart .cbtnm{display:inline-flex}
+.phone .cart .hdr h2{display:none}
+.phone .cart .list{display:none}
+.phone .cart.open .list{display:block;max-height:240px}
+.phone .tgrid{grid-template-columns:repeat(2,1fr)}
+.phone .sum,.phone .two{grid-template-columns:1fr}
+.phone .tiles,.phone .qs{grid-template-columns:repeat(2,1fr)}
+.phone .qs{gap:12px}
+.phone .tiles{gap:12px}
+.phone h1.ph{font-size:30px}
+.rcpt{border-radius:var(--radius-card);border:2px solid var(--line);background:#fff;padding:24px}
+.rcpt>*+*{margin-top:16px}
+.rcpt .c{text-align:center}
+.rcpt .c>*+*{margin-top:4px}
+.ilist{list-style:none;padding:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ilist li{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0}
+.ilist li+li{border-top:1px solid var(--line)}
+.dlr{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mid{max-width:28rem;margin-left:auto;margin-right:auto;width:100%}
+.mid>*+*{margin-top:16px}
+.tbl{overflow:hidden;border-radius:var(--radius-card);border:1px solid var(--line);background:#fff}
+.tbl table{width:100%;border-collapse:collapse;text-align:left}
+.tbl th{padding:12px 16px;font-size:15px;font-weight:700;color:var(--muted);background:var(--bg);text-align:left}
+.tbl td{padding:12px 16px;border-top:1px solid var(--line)}
+.tbl .r{text-align:right}
+.tbl tr.hl td{background:rgba(232,245,236,.5)}
+.rl{font-weight:800;color:var(--primary-dark);text-decoration:underline}
+.cards{display:none}
+.phone .tbl{display:none}
+.phone .cards{display:block;list-style:none;padding:0}
+.phone .cards>li{border-radius:var(--radius-card);border:1px solid var(--line);background:#fff;padding:16px}
+.phone .cards>li+li{margin-top:12px}
+.phone .cards .tt{font-size:20px;line-height:28px;font-weight:800}
+.badge{display:inline-block;border-radius:999px;padding:4px 12px;font-size:15px;font-weight:700}
+.badge span{display:inline-flex;align-items:center;gap:6px}.badge svg{width:16px;height:16px}
+.badge.amber{background:var(--amber-tint);color:var(--amber)}
+.badge.green{background:var(--primary-tint);color:var(--primary-dark)}
+.rbody{display:grid;gap:16px;grid-template-columns:1fr 16rem}
+.rbody>*+*{margin-top:0}
+.phone .rbody{grid-template-columns:1fr}
+.pad{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);max-width:28rem}
+.pad .btn{font-size:24px;line-height:32px;width:100%}
+.pad .wide{grid-column:span 3}
+.quick{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+.quick .btn{width:100%}
+.chg{border-radius:var(--radius-card);background:var(--primary-tint);padding:16px;text-align:center}
+.chg .a{font-size:18px;line-height:28px;font-weight:700;color:var(--primary-dark)}
+.chg .v{font-size:48px;line-height:1;font-weight:800;color:var(--primary-dark)}
+.paytot{display:flex;align-items:baseline;justify-content:space-between;font-size:20px;line-height:28px;font-weight:800}
+.paytot b{font-size:36px;line-height:40px}
+.choice{display:flex;min-height:96px;align-items:center;gap:16px;border-radius:var(--radius-card);border:2px solid var(--line);background:#fff;padding:16px}
+.choice.on{border-color:var(--primary);background:var(--primary-tint)}
+.choice .t{flex:1}
+.choice .nm{display:block;font-size:20px;line-height:28px;font-weight:800}
+.choice .ds{display:block;color:var(--muted)}
+.choice .rd{display:flex;width:32px;height:32px;flex:none;align-items:center;justify-content:center;border-radius:50%;border:2px solid var(--line);background:#fff;color:#fff}
+.choice.on .rd{border-color:var(--primary);background:var(--primary)}
+.choice .rd svg{width:20px;height:20px;display:none}.choice.on .rd svg{display:block}
+.stack>*+*{margin-top:12px}.stack3>*+*{margin-top:16px}.stack4>*+*{margin-top:20px}
+.btnrow{display:flex;gap:12px}
+.hide{display:none!important}
+.sbalance{font-size:36px;line-height:40px;font-weight:800}
+
+/* overlays */
+.ov{position:absolute;inset:0;z-index:40;background:rgba(20,35,26,.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .25s;pointer-events:none}
+.ov.on{opacity:1}
+.sheet{width:560px;max-width:100%;max-height:85%;overflow:hidden;background:var(--bg);border-radius:var(--radius-card);box-shadow:0 25px 50px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.sheet .sh{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line);flex:none}
+.sheet .sh h2{font-size:24px;line-height:32px;font-weight:800}
+.sheet .sh span{display:inline-flex;min-height:44px;align-items:center;gap:6px;padding:0 12px;font-size:15px;font-weight:700;color:var(--primary-dark)}
+.sheet .sh svg{width:20px;height:20px}
+.sheet .sb{padding:24px;overflow-y:auto;scroll-behavior:smooth}
+.phone .sheet{width:100%;height:100%;max-height:none;border-radius:0}
+.phone .sheet .sb{padding:16px}
+.dlg{width:calc(100% - 2rem);max-width:480px;max-height:90%;overflow-y:auto;border-radius:var(--radius-card);background:#fff;padding:24px;scroll-behavior:smooth}
+.dlg>*+*{margin-top:16px}
+.dlg p.m{color:var(--muted)}
+.toasts{position:absolute;left:0;right:0;top:12px;margin:0 auto;max-width:520px;width:100%;padding:0 16px;z-index:80;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:flex-start;gap:12px;border-radius:var(--radius-card);border:2px solid var(--primary);background:var(--primary-tint);color:var(--primary-dark);padding:16px;box-shadow:0 10px 15px rgba(0,0,0,.12),0 4px 6px rgba(0,0,0,.08);animation:tin .35s ease both}
+.toast svg{width:24px;height:24px;flex:none;margin-top:2px}
+.toast p{flex:1;font-weight:600}
+.toast .x{width:44px;height:44px;margin:-8px;display:flex;align-items:center;justify-content:center}
+.toast .x svg{width:20px;height:20px;margin:0}
+@keyframes tin{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.spot{position:absolute;z-index:60;border-radius:20px;box-shadow:0 0 0 3px var(--primary),0 0 0 8px rgba(14,124,58,.22);opacity:0;transition:opacity .35s;pointer-events:none}
+.spot.on{opacity:1}
+.cursor{position:absolute;left:0;top:0;z-index:90;pointer-events:none;transition:transform var(--mv,.45s) cubic-bezier(.4,.1,.2,1);will-change:transform}
+.cursor svg{width:28px;height:28px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));display:block;margin:0}
+.cursor .rip{position:absolute;left:-18px;top:-18px;width:36px;height:36px;border-radius:50%;background:rgba(14,124,58,.35);border:2px solid var(--primary);opacity:0;transform:scale(.3)}
+.cursor .rip.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.9;transform:scale(.3)}100%{opacity:0;transform:scale(1.6)}}
+.phone .cursor svg{display:none}
+.phone .cursor .fing{display:block}
+.fing{display:none;position:absolute;left:-16px;top:-16px;width:32px;height:32px;border-radius:50%;background:rgba(20,35,26,.35);border:2px solid #fff}
+.reduced .cursor,.reduced .spot{display:none}
+@media (prefers-reduced-motion:reduce){.page,.cursor,.callout,.ov,.spot{transition:none}.toast{animation:none}}
+@media (max-width:640px){dl.spec{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<a class="sr" href="#player">Skip to the walkthrough</a>
+<div class="x-bg" aria-hidden="true"></div>
+<div class="x-app">
+  <header class="x-top">
+    <svg viewBox="0 0 64 64" width="36" height="36" role="img" aria-label="TindaTrack"><rect width="64" height="64" rx="16" fill="#0E7C3A"/><path d="M16 13H48L52 25a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0Z" fill="#fff"/><path d="M22 43l8 8 14-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1 class="x-name">TindaTrack</h1>
+    <span class="x-tag">Store management for a sari-sari store: selling, stock, utang and the cash drawer.</span>
+    <span class="x-sp"></span>
+    <button class="x-btn" id="more" type="button" aria-haspopup="dialog">Features &amp; tech</button>
+  </header>
+
+  <main class="x-main">
+    <section class="x-stage" id="player" aria-label="Product walkthrough">
+      <div class="device desktop" id="device">
+        <div class="bar" aria-hidden="true"><i></i><i></i><i></i><b>TindaTrack</b></div>
+        <div class="viewport" id="viewport">
+          <div class="canvas" id="canvas" aria-hidden="true">
+            <div class="app" id="app"></div>
+            <div class="ov" id="ov"></div>
+            <div class="toasts" id="toasts"></div>
+            <div class="spot" id="spot"></div>
+            <div class="cursor" id="cursor"><div class="rip" id="rip"></div><div class="fing"></div><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2 3 7-3 1-3-7-5 4z" fill="#14231a" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="x-panel" aria-label="Walkthrough guide">
+      <div class="x-hd">
+        <div class="x-stephead"><span class="x-step" id="stepn">01 / 07</span><span class="x-live"><i></i>Live demo</span></div>
+        <h2 class="x-title" id="stitle">Today</h2>
+      </div>
+      <p class="x-desc" id="sdesc"></p>
+      <ul class="x-funcs" id="sfuncs"></ul>
+      <div class="x-fill"></div>
+      <p class="caption" id="caption" aria-live="polite"></p>
+      <div class="callout" id="callout"><b id="ctag">Problem</b><span id="ctext"></span></div>
+      <div class="controls" role="group" aria-label="Walkthrough controls">
+        <button class="cbtn" id="prev" type="button" aria-label="Previous scene" title="Previous">&#8592;</button>
+        <button class="cbtn main" id="play" type="button" aria-label="Pause">Pause</button>
+        <button class="cbtn" id="next" type="button" aria-label="Next scene" title="Next">&#8594;</button>
+        <button class="cbtn" id="replay" type="button" aria-label="Replay this scene" title="Replay">&#8635;</button>
+        <button class="cbtn" id="speed" type="button" aria-label="Change speed" title="Speed">1.6×</button>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="prog"></i></div>
+      <ol class="dots" id="dots" aria-label="Scenes"></ol>
+    </aside>
+  </main>
+</div>
+
+<div class="x-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="kf">
+  <div class="x-sheet">
+    <div class="x-shead"><h2 id="kf">Key features</h2><button class="x-btn" id="closeModal" type="button">Close</button></div>
+    <ul class="grid2" style="margin-top:12px">
+      <li class="card2"><h3>Today dashboard</h3><p>Total utang, low stock, top sellers and a weekly chart.</p></li>
+      <li class="card2"><h3>Quick sell</h3><p>Sell 1 on a favorite makes a cash sale with a receipt.</p></li>
+      <li class="card2"><h3>Store View cashier</h3><p>Tiles, sizes, cart, Other item, payment and live change.</p></li>
+      <li class="card2"><h3>Receipts log</h3><p>Every sale by date, with search and the full receipt.</p></li>
+      <li class="card2"><h3>Open and close the store</h3><p>Cash count with Short, Over or Balanced, plus closing history.</p></li>
+      <li class="card2"><h3>Utang ledger</h3><p>Customer balances, utang history and partial payments.</p></li>
+      <li class="card2"><h3>English and Filipino</h3><p>Every screen is available in both languages.</p></li>
+    </ul>
+    <h2>Problems solved</h2>
+    <ul class="grid2">
+      <li class="card2 pair"><span class="iss">Quick sell lowered stock but left no record of the sale.</span><span class="sol">Every sale is a receipt and moves the expected cash.</span></li>
+      <li class="card2 pair"><span class="iss">A bad connection could save the same sale twice.</span><span class="sol">Each sale has its own request id, so a retry saves once.</span></li>
+      <li class="card2 pair"><span class="iss">Selling more than the stock.</span><span class="sol">The sale is refused, and the short lines are marked.</span></li>
+      <li class="card2 pair"><span class="iss">Forgotten or unchecked cash counts.</span><span class="sol">Closing needs a count and a note when it is Short or Over.</span></li>
+    </ul>
+    <h2>Tech and deployment</h2>
+    <dl class="spec">
+      <dt>Front end</dt><dd>Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Inter font</dd>
+      <dt>Data</dt><dd>TanStack Query talking to a separate REST API</dd>
+      <dt>Auth</dt><dd>Supabase email and password login (the API verifies the token)</dd>
+      <dt>Security</dt><dd>Nonce-based Content-Security-Policy and security headers</dd>
+      <dt>Quality</dt><dd>Vitest unit tests, Playwright end-to-end tests, ESLint, knip, GitHub Actions CI</dd>
+      <dt>Hosting</dt><dd>Not published as a public site</dd>
+      <dt>Status</dt><dd>Private, custom-built project. Source code available on request.</dd>
+    </dl>
+    <p class="x-foot">All data in this walkthrough is made up. No real store or customer data is shown.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+"use strict";
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- state ---------- */
+var SPEEDS = [{ l: "1×", v: 1 }, { l: "1.6×", v: 0.62 }, { l: "2.4×", v: 0.42 }], SP = 1, SPEED = SPEEDS[SP].v;
+var S = { i: 0, paused: false, token: 0, mode: "desktop", scale: 1, lang: "en", open: true, resume: null, y: 0 };
+var SIZE = { desktop: { w: 1280, h: 800 }, phone: { w: 390, h: 800 } };
+var els = { stage: $("#player"), device: $("#device"), viewport: $("#viewport"), canvas: $("#canvas"), app: $("#app"), ov: $("#ov"), toasts: $("#toasts"), spot: $("#spot"), cursor: $("#cursor"), rip: $("#rip"), caption: $("#caption"), callout: $("#callout"), ctag: $("#ctag"), ctext: $("#ctext"), prog: $("#prog"), dots: $("#dots"), play: $("#play") };
+if (reduce) document.documentElement.classList.add("reduced");
+
+/* ---------- text (copied from src/lib/i18n/messages.ts) ---------- */
+var T = {
+  en: { today: "Today", products: "Products", credit: "Credit", bottles: "Bottles", account: "My account", langName: "English",
+    greet: "Good morning, Maria", sub: "What do you want to do today?", addCredit: "Add credit", recv: "Receive payment", newProd: "New product", retBottle: "Return bottle",
+    totalUtang: "Total utang", debtors: "Customers with utang: 3", low: "Low or out of stock: 2", bott: "Bottles with customers: 6", topDeb: "Who owes the most", topSell: "Top sellers (30 days)", sold: " sold",
+    weekly: "Utang and payments by week", added: "Utang added", paid: "Paid", quick: "Quick sell", seeAll: "See all products", per: "per", left: " left", sell1: "Sell 1", add1: "Add 1", out: "Out of stock",
+    open: "OPEN", closed: "CLOSED", pc: "Piece", bottle: "Bottle", kg: "Kilo", pack: "Pack", ln: "Language", favs: "Favorites" },
+  fil: { today: "Ngayon", products: "Paninda", credit: "Utang", bottles: "Bote", account: "Aking account", langName: "Filipino",
+    greet: "Magandang umaga, Maria", sub: "Ano ang gagawin mo ngayon?", addCredit: "Dagdag utang", recv: "Tumanggap ng bayad", newProd: "Bagong paninda", retBottle: "Ibalik ang bote",
+    totalUtang: "Kabuuang utang", debtors: "May utang na customer: 3", low: "Paubos o ubos na ang stock: 2", bott: "Bote sa mga customer: 6", topDeb: "Pinakamalaking may utang", topSell: "Pinakamabenta (30 araw)", sold: " ang nabenta",
+    weekly: "Utang at bayad kada linggo", added: "Dagdag utang", paid: "Bayad", quick: "Mabilis na benta", seeAll: "Tingnan ang lahat ng paninda", per: "kada", left: " ang natitira", sell1: "Magbenta ng 1", add1: "Dagdag 1", out: "Ubos na ang stock",
+    open: "BUKAS", closed: "SARADO", pc: "Piraso", bottle: "Bote", kg: "Kilo", pack: "Balot", ln: "Wika", favs: "Mga Paborito" }
+};
+function tx() { return T[S.lang]; }
+
+/* ---------- helpers ---------- */
+function peso(c) { var s = c < 0 ? "-" : "", a = Math.abs(Math.round(c)), p = Math.floor(a / 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), k = a % 100; return s + "₱" + p + (k === 0 ? "" : "." + String(k).padStart(2, "0")); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+var ICON = {
+  today: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+  products: '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+  credit: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+  bottles: '<path d="M10 2h4"/><path d="M10 2v4l-2 3v11a2 2 0 002 2h4a2 2 0 002-2V9l-2-3V2"/><path d="M8 13h8"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/>',
+  cash: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/>',
+  check: '<path d="M5 13l4 4L19 7"/>', close: '<path d="M6 6l12 12"/><path d="M18 6L6 18"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>',
+  alert: '<path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5"/><path d="M12 18h.01"/>',
+  back: '<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>'
+};
+function ic(n, cls) { return '<svg class="ico ' + (cls || "") + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" width="24" height="24">' + ICON[n] + "</svg>"; }
+function logo(sz) { return '<svg viewBox="0 0 64 64" width="' + sz + '" height="' + sz + '"><rect width="64" height="64" rx="16" fill="#0E7C3A"/><path d="M16 13H48L52 25a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0a5 5 0 01-10 0Z" fill="#fff"/><path d="M22 43l8 8 14-15" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+function brand() { return '<div class="brandrow">' + logo(40) + "<span>TindaTrack</span></div>"; }
+function badgeStat() { var t = tx(); return '<span class="stat' + (S.open ? "" : " closed") + '" id="stat"><i></i>' + (S.open ? t.open : t.closed) + "</span>"; }
+
+/* ---------- shell: sidebar (desktop) or header + bottom tabs (phone) ---------- */
+function paintShell(active) {
+  var t = tx(), nav = [["today", t.today], ["products", t.products], ["credit", t.credit], ["bottles", t.bottles]];
+  var side = '<nav class="sidebar"><div class="top"><div class="id">' + brand() + '<p class="sname">Mabini Sari-Sari Store</p>' + badgeStat() + '</div><ul class="navl">' +
+    nav.map(function (n) { return '<li><span class="sl' + (active === n[0] ? " on" : "") + '" data-nav="' + n[0] + '">' + ic(n[0]) + n[1] + "</span></li>"; }).join("") +
+    '</ul></div><ul class="navl bot"><li><span class="sl' + (active === "language" ? " on" : "") + '" data-nav="language">' + ic("globe") + "<span>" + t.langName + '</span></span></li><li><span class="sl">' + ic("credit") + t.account + "</span></li></ul></nav>";
+  var head = '<header class="mhead"><div class="l">' + brand() + '<p class="sname" style="padding-top:4px">Mabini Sari-Sari Store</p>' + badgeStat().replace('id="stat"', 'id="stat2"') + '</div><span class="pill" data-nav="language">' + ic("globe") + t.langName + "</span></header>";
+  var bn = '<ul class="bnav">' + nav.map(function (n) { return '<li><a class="' + (active === n[0] ? "on" : "") + '" data-nav="' + n[0] + '">' + ic(n[0], "") .replace('width="24" height="24"', 'width="28" height="28"') + n[1] + "</a></li>"; }).join("") + "</ul>";
+  els.app.innerHTML = side + '<div class="col">' + head + '<div class="main" id="main"><div class="page" id="page"></div></div>' + bn + "</div>";
+}
+function paintPage(html) { var oc = $("#main > #cartHost"); if (oc) oc.remove(); S.y = 0; var p = $("#page"); p.style.transition = "none"; p.style.transform = "translateY(0)"; p.innerHTML = html; void p.offsetHeight; p.style.transition = ""; }
+function refreshBadge() { var t = tx(); ["stat", "stat2"].forEach(function (id) { var e = document.getElementById(id); if (e) { e.className = "stat" + (S.open ? "" : " closed"); e.innerHTML = "<i></i>" + (S.open ? t.open : t.closed); } }); }
+function header(title, sub, back) { return '<header class="hd">' + (back ? '<span class="back">' + ic("back") + back + "</span>" : "") + '<h1 class="ph">' + title + "</h1>" + (sub ? '<p class="sub">' + sub + "</p>" : "") + "</header>"; }
+function tabs(on) { var n = ["Product list", "Store View", "Receipts"]; return '<div class="tabs">' + n.map(function (x, i) { return '<span class="tab' + (i === on ? " on" : "") + '" data-tab="' + i + '">' + x + "</span>"; }).join("") + "</div>"; }
+function field(label, val, o) { o = o || {}; return '<div class="field"' + (o.id ? ' id="' + o.id + '"' : "") + '><span class="lbl">' + label + '</span><div class="input' + (o.big ? " big" : "") + '" data-in="' + (o.in || "") + '"><span class="v">' + esc(val || "") + '</span><span class="caret"></span></div></div>'; }
+function btn(label, o) { o = o || {}; return '<span class="btn' + (o.sec ? " sec" : "") + (o.sm ? " sm" : "") + (o.w ? " w" : "") + (o.amber ? " amber" : "") + (o.dis ? " dis" : "") + '"' + (o.id ? ' id="' + o.id + '"' : "") + ">" + label + "</span>"; }
+
+/* ---------- Today ---------- */
+var QS = [
+  { id: "coke", n: "Coke 1.5L", price: 6500, stock: 20, u: "bottle" },
+  { id: "lucky", n: "Lucky Me Pancit Canton", price: 1500, stock: 36, u: "pack" },
+  { id: "eggs", n: "Eggs", price: 1000, stock: 0, u: "pc" },
+  { id: "sugar", n: "Sugar 1kg", price: 7000, stock: 14, u: "kg" }
+];
+function chart() {
+  var wk = ["Sep 28", "Oct 5", "Oct 12", "Oct 19", "Oct 26", "Nov 2", "Nov 9", "Nov 16"], cr = [35000, 52000, 41000, 68000, 59000, 73000, 64000, 80000], pd = [20000, 30000, 45000, 40000, 50000, 42000, 56000, 45000];
+  var W = 320, H = 160, TOP = 16, BOT = 26, PLOT = H - TOP - BOT, max = Math.max.apply(null, cr.concat(pd)), gw = W / 8, bw = Math.min(16, gw * 0.36);
+  function ratio(v) { return v <= 0 ? 0 : Math.max(0.02, Math.min(1, v / max)); }
+  var out = '<svg viewBox="0 0 320 160" style="width:100%;height:auto;display:block" aria-hidden="true"><defs><pattern id="stp" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="5" height="5" fill="#fff"/><rect width="2.5" height="5" fill="#0e7c3a"/></pattern></defs>' +
+    '<line x1="0" x2="320" y1="' + (TOP + PLOT) + '" y2="' + (TOP + PLOT) + '" stroke="#dce5de" stroke-width="1"/><line x1="0" x2="320" y1="' + TOP + '" y2="' + TOP + '" stroke="#dce5de" stroke-dasharray="3 3" stroke-width="1"/><text x="0" y="' + (TOP - 4) + '" fill="#4a5a50" font-size="9">' + peso(max) + "</text>";
+  wk.forEach(function (w, i) { var c = i * gw + gw / 2, a = ratio(cr[i]) * PLOT, b = ratio(pd[i]) * PLOT;
+    out += '<rect x="' + (c - bw - 1) + '" y="' + (TOP + PLOT - a) + '" width="' + bw + '" height="' + a + '" fill="#b84a00"/><rect x="' + (c + 1) + '" y="' + (TOP + PLOT - b) + '" width="' + bw + '" height="' + b + '" fill="url(#stp)" stroke="#0e7c3a" stroke-width="1"/><text x="' + c + '" y="152" text-anchor="middle" fill="#4a5a50" font-size="9">' + w + "</text>"; });
+  return out + "</svg>";
+}
+function qcard(p, o) {
+  var t = tx(), out = p.stock <= 0, lowc = p.stock > 0 && p.stock <= 5;
+  var unit = t[p.u];
+  return '<li class="qcard" data-q="' + p.id + '"><div class="info"><p class="n">' + p.n + '</p><p class="t15 muted">' + peso(p.price) + " " + t.per + " " + unit + '</p><p class="t15 bold ' + (out || lowc ? "am" : "pdk") + '" data-stock="' + p.id + '">' + (S.lang === "en" ? p.stock + t.left : p.stock + t.left) + "</p></div>" +
+    btn(out ? t.out : t.sell1, { w: 1, id: "sell-" + p.id, dis: out }) + btn(t.add1, { sec: 1, sm: 1, w: 1 }) + "</li>";
+}
+function todayHTML() {
+  var t = tx();
+  var tile = function (ic2, label) { return '<li><span class="ttile"><span class="c">' + ic(ic2).replace('width="24" height="24"', 'width="32" height="32"') + "</span>" + label + "</span></li>"; };
+  return header(t.greet, t.sub) +
+    '<ul class="tiles t4" id="tiles">' + tile("credit", t.addCredit) + tile("cash", t.recv) + tile("products", t.newProd) + tile("bottles", t.retBottle) + "</ul>" +
+    '<section class="sect" style="margin-top:24px"><div id="cards"><ul class="sum"><li><span class="sumc"><span class="t15 bold muted" style="display:block">' + t.totalUtang + '</span><span style="display:block;font-size:30px;line-height:36px;font-weight:800">' + peso(125000) + '</span><span class="t15 muted" style="display:block">' + t.debtors + '</span></span></li><li><span class="sumc"><span class="h2" style="display:block">' + t.low + '</span></span></li><li><span class="sumc"><span class="h2" style="display:block">' + t.bott + "</span></span></li></ul></div>" +
+    '<div class="two" style="margin-top:24px"><section class="sect"><h2 class="h2">' + t.topDeb + '</h2><ul class="rows" id="debt"><li class="row"><span class="bold">Aling Nena</span><span style="font-size:18px;line-height:28px;font-weight:800">' + peso(65000) + '</span></li><li class="row"><span class="bold">Mang Boy</span><span style="font-size:18px;line-height:28px;font-weight:800">' + peso(40000) + '</span></li><li class="row"><span class="bold">Kuya Ben</span><span style="font-size:18px;line-height:28px;font-weight:800">' + peso(20000) + "</span></li></ul></section>" +
+    '<section class="sect"><h2 class="h2">' + t.topSell + '</h2><ul class="rows"><li class="row"><span class="bold">Coke 1.5L</span><span class="t15 muted">14' + t.sold + '</span></li><li class="row"><span class="bold">Eggs</span><span class="t15 muted">9' + t.sold + '</span></li><li class="row"><span class="bold">Lucky Me Pancit Canton</span><span class="t15 muted">8' + t.sold + "</span></li></ul></section></div></section>" +
+    '<section class="sect"><h2 class="h2">' + t.weekly + '</h2><div class="card" id="chart"><div style="max-width:42rem"><div class="stack">' + chart() + '<ul class="legend"><li><svg viewBox="0 0 16 16"><rect width="16" height="16" fill="#b84a00"/></svg>' + t.added + '</li><li><svg viewBox="0 0 16 16"><rect width="16" height="16" fill="url(#stp)" stroke="#0e7c3a"/></svg>' + t.paid + "</li></ul></div></div></div></section>" +
+    '<section class="sect" id="quick"><div class="between"><h2 class="h2">' + t.quick + '</h2><span class="seelink">' + t.seeAll + '</span></div><ul class="qs" id="qs">' + QS.map(function (p) { return qcard(p); }).join("") + "</ul></section>";
+}
+
+/* ---------- Store View ---------- */
+var PRODS = [
+  { id: "coke", n: "Coke 1.5L", price: 6500, stock: 20 }, { id: "lucky", n: "Lucky Me Pancit Canton", price: 1500, stock: 36 },
+  { id: "eggs", n: "Eggs", price: 1000, stock: 0 }, { id: "marl", n: "Marlboro", group: true, sizes: [{ id: "stick", label: "Stick", price: 800, stock: 120 }, { id: "packm", label: "Pack", price: 16000, stock: 8 }] },
+  { id: "sugar", n: "Sugar 1kg", price: 7000, stock: 14 }
+];
+function tileHTML(p, scope) {
+  var out = !p.group && p.stock <= 0, sub;
+  if (p.group) sub = '<span class="p">From ' + peso(Math.min.apply(null, p.sizes.map(function (s) { return s.price; }))) + '</span><span class="s">' + p.sizes.length + " sizes</span>";
+  else sub = '<span class="p">' + peso(p.price) + '</span><span class="s">' + (out ? "Out of stock" : p.stock + " left") + "</span>";
+  return '<li><span class="tile' + (out ? " out" : "") + '" data-tile="' + scope + "-" + p.id + '"><span class="n">' + p.n + "</span>" + sub + "</span></li>";
+}
+function lineHTML(l) {
+  var dis1 = l.qty <= 1;
+  return '<li class="line" data-line="' + l.id + '"><div class="top2"><div><p class="nm">' + esc(l.name) + '</p><p class="t15 muted">' + peso(l.price) + '</p></div>' + btn("Remove", { sec: 1, sm: 1 }) + '</div><div class="qt"><span class="step' + (dis1 ? " dis" : "") + '">−</span><span class="qn">' + l.qty + '</span><span class="step">+</span><span style="margin-left:auto;font-size:20px;line-height:28px;font-weight:800">' + peso(l.price * l.qty) + "</span></div></li>";
+}
+var SV = { cart: [], open: false };
+function svTotal() { return SV.cart.reduce(function (s, l) { return s + l.price * l.qty; }, 0); }
+function cartHTML() {
+  var n = SV.cart.length, tot = svTotal(), emp = n === 0;
+  return '<aside class="cart' + (SV.open ? " open" : "") + '" id="cart"><div class="hdr"><h2 class="h2">Cart</h2><span class="cbtnm" id="cartToggle">Cart (' + n + ")</span>" + (emp ? "" : btn("Clear cart", { sec: 1, sm: 1 })) + '</div><div class="list" id="cartList">' +
+    (emp ? '<p class="muted" style="padding:12px 0">The cart is empty. Tap an item to add it.</p>' : "<ul>" + SV.cart.map(lineHTML).join("") + "</ul>") + '</div><div class="foot2"><p class="between h2"><span>Total</span><span id="cartTotal">' + peso(tot) + '</span></p><div class="btns">' + btn("Other item", { sec: 1, w: 1, id: "otherBtn" }) + btn("Charge " + peso(tot), { w: 1, id: "chargeBtn", dis: emp }) + "</div></div></aside>";
+}
+function storeViewHTML() {
+  var favs = [PRODS[0], PRODS[1]];
+  return tabs(1) + header("Store View", "Tap an item to sell it.") +
+    '<div class="svgrid"><div class="stack4" style="min-width:0">' + field("Search items", "", { in: "search" }) +
+    '<section class="sect"><h2 class="h2">Favorites</h2><ul class="tgrid" id="favs">' + favs.map(function (p) { return tileHTML(p, "fav"); }).join("") + "</ul></section>" +
+    '<div class="catrow"><span class="chipb on">All categories</span><span class="chipb">Soft drinks</span><span class="chipb">Noodles</span><span class="chipb">Cigarettes</span><span class="chipb">Eggs &amp; fresh</span></div>' +
+    '<ul class="tgrid" id="items">' + PRODS.map(function (p) { return tileHTML(p, "item"); }).join("") + "</ul></div><div id=\"cartHost\">" + cartHTML() + "</div></div>";
+}
+function dockCart() { if (S.mode !== "phone") return; var h = $("#cartHost"); if (h) $("#main").appendChild(h); }
+function repaintCart() { $("#cartHost").innerHTML = cartHTML(); }
+function addLine(id, name, price) { var f = SV.cart.filter(function (l) { return l.id === id; })[0]; if (f) f.qty++; else SV.cart.push({ id: id, name: name, price: price, qty: 1 }); repaintCart(); }
+
+function receiptCard(r) {
+  return '<article class="rcpt" id="rcpt"><div class="c"><p class="h2b" style="font-size:20px;line-height:28px;font-weight:800">Mabini Sari-Sari Store</p><p class="muted">' + r.when + '</p><p class="bold" style="font-size:18px;line-height:28px">Receipt no. <span>' + r.no + '</span></p></div><ul class="ilist">' +
+    r.items.map(function (i) { return '<li><span><span class="bold">' + i[0] + '</span><span class="t15 muted" style="display:block">' + i[1] + " × " + peso(i[2]) + '</span></span><span class="bold">' + peso(i[1] * i[2]) + "</span></li>"; }).join("") +
+    '</ul><div class="stack" style="font-size:18px;line-height:28px"><p class="dlr" style="font-size:24px;line-height:32px;font-weight:800"><span>Total</span><span>' + peso(r.total) + '</span></p><p class="dlr"><span>Paid</span><span>' + peso(r.paid) + '</span></p><p class="dlr xbold pdk"><span>Change</span><span id="rchange">' + peso(r.paid - r.total) + "</span></p></div></article>";
+}
+var R2 = { no: "20261116-0002", when: "Nov 16, 2026, 9:05 AM", total: 7800, paid: 10000, items: [["Coke 1.5L", 1, 6500], ["Marlboro Stick", 1, 800], ["Ice", 1, 500]] };
+var R1 = { no: "20261116-0001", when: "Nov 16, 2026, 8:12 AM", total: 6500, paid: 6500, items: [["Coke 1.5L", 1, 6500]] };
+var RECS = [
+  { r: { no: "20261116-0004", when: "Nov 16, 2026, 10:15 AM", total: 4500, paid: 5000, items: [["Lucky Me Pancit Canton", 3, 1500]] }, id: "4" },
+  { r: { no: "20261116-0003", when: "Nov 16, 2026, 9:40 AM", total: 6000, paid: 6000, items: [["Eggs", 6, 1000]] }, id: "3" },
+  { r: R2, id: "2" }, { r: R1, id: "1" }
+];
+
+/* ---------- Receipts log ---------- */
+function logHTML(q, hlId) {
+  var rows = RECS.filter(function (x) { return !q || x.r.items.some(function (i) { return i[0].toLowerCase().indexOf(q.toLowerCase()) >= 0; }) || x.r.no.indexOf(q) >= 0; });
+  var trs = rows.map(function (x) { return '<tr class="' + (x.id === hlId ? "hl" : "") + '" data-rec="' + x.id + '"><td><span class="rl">' + x.r.no + '</span></td><td>' + x.r.when.replace("Nov 16, 2026, ", "Nov 16, 2026, ") + '</td><td class="r bold">' + peso(x.r.total) + "</td></tr>"; }).join("");
+  var cards = rows.map(function (x) { return '<li data-rec="' + x.id + '"><p class="tt"><span class="rl">' + x.r.no + '</span></p><div class="between" style="margin-top:8px"><span class="t15 bold muted">Time</span><span>' + x.r.when.replace("Nov 16, 2026, ", "") + '</span></div><div class="between"><span class="t15 bold muted">Total</span><span class="bold">' + peso(x.r.total) + "</span></div></li>"; }).join("");
+  return tabs(2) + header("Receipts", "Every sale, newest first.") + '<div class="rbody"><div>' + field("Search receipt no. or item", q || "", { in: "rsearch" }) + '</div><div class="stack">' + field("Date", "11/16/2026") + btn("Show all days", { sec: 1, sm: 1, w: 1 }) + "</div></div>" +
+    '<div class="tbl"><table><thead><tr><th>Receipt no.</th><th>Time</th><th class="r">Total</th></tr></thead><tbody id="rtbody">' + trs + '</tbody></table></div><ul class="cards">' + cards + "</ul>";
+}
+
+/* ---------- Close store ---------- */
+var CL = { counted: "", note: "", expected: 74800 };
+function diffHTML() { if (CL.counted === "") return "-"; var d = Math.round(parseFloat(CL.counted) * 100) - CL.expected; if (d === 0) return '<strong class="pdk" data-d="balanced">Balanced</strong>'; return '<strong class="' + (d < 0 ? "am" : "pdk") + '" data-d="' + (d < 0 ? "short" : "over") + '">' + (d < 0 ? "Short " : "Over ") + peso(Math.abs(d)) + "</strong>"; }
+function closeHTML() {
+  var keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "00"];
+  var needNote = CL.counted !== "" && Math.round(parseFloat(CL.counted) * 100) !== CL.expected;
+  return header("Close the store", "", "Store") + '<div class="stack3"><div class="card"><h2 class="h2b">Count the cash in the drawer.</h2><div class="stack3"><div class="quickx">' + field("Counted cash (₱)", CL.counted, { big: 1, in: "counted" }) + '</div><div class="pad" id="pad">' + keys.map(function (k) { return '<span class="btn sec" data-key="' + k + '">' + k + "</span>"; }).join("") + '<span class="btn sec wide">⌫</span></div></div>' + btn("Count by bills and coins", { sec: 1, sm: 1 }) + "</div>" +
+    '<div class="card" id="diffcard"><dl class="stack" style="margin:0"><div class="between"><dt class="t15 bold muted">Expected</dt><dd class="xbold" style="font-size:20px;line-height:28px;font-weight:700">' + peso(CL.expected) + '</dd></div><div class="between"><dt class="t15 bold muted">Counted</dt><dd id="cnt" style="font-size:20px;line-height:28px;font-weight:700">' + (CL.counted === "" ? "-" : peso(Math.round(parseFloat(CL.counted) * 100))) + '</dd></div><div class="between" style="border-top:1px solid var(--line);padding-top:8px"><dt class="t15 bold muted">Difference</dt><dd id="diff" style="font-size:24px;line-height:32px;font-weight:800">' + diffHTML() + "</dd></div></dl></div>" +
+    (needNote ? '<div class="field" id="noteBox"><span class="lbl">Note about the difference</span><p class="hint">Required when the count is Short or Over. Say what may have happened.</p><div class="input textarea" data-in="note"><span class="v">' + esc(CL.note) + '</span><span class="caret"></span></div><p class="counter">' + CL.note.length + " / 200</p></div>" : "") +
+    btn("Close store", { id: "closeBtn" }) + "</div>";
+}
+
+/* ---------- Utang ---------- */
+var UT = { balance: 65000, rows: [{ d: "Nov 3, 2026", note: "Groceries", total: 40000, bal: 40000, st: "UNPAID" }, { d: "Oct 28, 2026", note: "Rice and eggs", total: 50000, bal: 25000, st: "PARTIAL" }] };
+function badgeHTML(st) { var m = { UNPAID: ["amber", "alert", "Unpaid"], PARTIAL: ["amber", "info", "Partly paid"], PAID: ["green", "check", "Paid"] }[st]; return '<span class="badge ' + m[0] + '"><span>' + ic(m[1]).replace('width="24" height="24"', 'width="16" height="16"') + m[2] + "</span></span>"; }
+function utangHTML() {
+  var trs = UT.rows.map(function (r, i) { return '<tr data-row="' + i + '"><td>' + r.d + "</td><td>" + r.note + '</td><td class="r">' + peso(r.total) + '</td><td class="r"><strong>' + peso(r.bal) + "</strong></td><td>" + badgeHTML(r.st) + "</td><td>" + btn("View", { sec: 1, sm: 0 }) + "</td></tr>"; }).join("");
+  var cards = UT.rows.map(function (r) { return "<li><p class=\"tt\">" + r.d + '</p><div class="between" style="margin-top:8px"><span class="t15 bold muted">Total</span><span>' + peso(r.total) + '</span></div><div class="between"><span class="t15 bold muted">Balance</span><strong>' + peso(r.bal) + '</strong></div><div class="between"><span class="t15 bold muted">Status</span>' + badgeHTML(r.st) + "</div></li>"; }).join("");
+  return header("Aling Nena", "", "Customers") + '<div class="card"><div><p class="t15 bold muted">Total utang</p><p class="sbalance" id="bal" style="font-size:36px;line-height:40px">' + peso(UT.balance) + '</p></div><div class="btnrow" style="flex-wrap:wrap">' + btn("New utang") + btn("Pay", { sec: 1, id: "payBtn" }) + '</div></div><section class="sect"><h2 class="h2b">Credit history</h2><div class="tbl"><table><thead><tr><th>Date</th><th>Note</th><th class="r">Total</th><th class="r">Balance</th><th>Status</th><th>Actions</th></tr></thead><tbody id="utbody">' + trs + '</tbody></table></div><ul class="cards">' + cards + "</ul></section>";
+}
+
+/* ---------- Language ---------- */
+function languageHTML(sel) {
+  var ch = [["en", "English", "Simple English. This is the default."], ["fil", "Filipino", "Madaling intindihing Tagalog."]];
+  var t = tx();
+  return header(t.ln === "Wika" ? "Wika" : "Language", t.ln === "Wika" ? "Piliin ang wika ng app." : "Choose the language for the app.", "") + '<div class="stack">' +
+    ch.map(function (c) { var on = sel === c[0]; return '<div class="choice' + (on ? " on" : "") + '" data-lang="' + c[0] + '"><span class="t"><span class="nm">' + c[1] + '</span><span class="ds">' + c[2] + '</span></span><span class="rd">' + ic("check") + "</span></div>"; }).join("") + "</div>" + btn(t.ln === "Wika" ? "I-save" : "Save", { w: 1, id: "saveLang" });
+}
+
+/* ---------- overlay / toast ---------- */
+function showOv(html, cls) { els.ov.innerHTML = html; els.ov.className = "ov"; void els.ov.offsetHeight; els.ov.classList.add("on"); els.ov.dataset.k = cls || ""; }
+function hideOv() { els.ov.classList.remove("on"); els.ov.innerHTML = ""; }
+function sheet(title, body) { return '<div class="sheet" role="presentation"><div class="sh"><h2>' + title + "</h2><span>" + ic("close") + "Close</span></div><div class=\"sb\" id=\"sb\">" + body + "</div></div>"; }
+function dlg(inner) { return '<div class="dlg" id="dlg">' + inner + "</div>"; }
+function toast(label, msg) { var d = document.createElement("div"); d.className = "toast"; d.innerHTML = ic("check") + '<p><b style="font-weight:800">' + label + ": </b>" + msg + '</p><span class="x">' + ic("close") + "</span>"; els.toasts.appendChild(d); }
+function clearTransient() { hideOv(); els.toasts.innerHTML = ""; setSpot(null); els.callout.classList.remove("on"); }
+
+/* ---------- engine ---------- */
+function Cancelled() { this.cancelled = true; }
+function chk(tok) { if (tok !== S.token) throw new Cancelled(); }
+function sleep(ms, tok) {
+  if (reduce) return Promise.resolve();
+  return new Promise(function (res, rej) {
+    var left = ms * SPEED;
+    (function tick() {
+      if (tok !== S.token) return rej(new Cancelled());
+      if (S.paused) { S.resume = function () { S.resume = null; tick(); }; return; }
+      if (left <= 0) return res();
+      var d = Math.min(60, left); left -= d; setTimeout(tick, d);
+    })();
+  });
+}
+function rectIn(el) { var r = el.getBoundingClientRect(), c = els.canvas.getBoundingClientRect(), k = S.scale; return { x: (r.left - c.left) / k, y: (r.top - c.top) / k, w: r.width / k, h: r.height / k }; }
+function q(sel) { var e = typeof sel === "string" ? $(sel, els.app) || $(sel, els.ov) : sel; if (!e) throw new Error("missing " + sel); return e; }
+function setSpot(sel, pad) {
+  if (!sel || reduce) { els.spot.classList.remove("on"); return; }
+  var e = typeof sel === "string" ? ($(sel, els.ov) || $(sel, els.app)) : sel; if (!e) return;
+  var r = rectIn(e), p = pad == null ? 8 : pad; els.spot.style.left = r.x - p + "px"; els.spot.style.top = r.y - p + "px"; els.spot.style.width = r.w + 2 * p + "px"; els.spot.style.height = r.h + 2 * p + "px"; els.spot.classList.add("on");
+}
+async function scrollTo(y, tok) { var p = $("#page"); S.y = Math.max(0, y); p.style.transform = "translateY(" + -S.y + "px)"; await sleep(650, tok); }
+async function reveal(el, tok) {
+  var sb = el.closest && el.closest(".sb, .dlg");
+  if (sb && els.ov.contains(el)) {
+    var r = rectIn(el), b = rectIn(sb);
+    if (r.y + r.h > b.y + b.h - 30 || r.y < b.y + 30) { sb.scrollTop = Math.max(0, sb.scrollTop + (r.y - b.y) - b.h / 2 + r.h / 2); await sleep(500, tok); }
+    return;
+  }
+  if (els.ov.classList.contains("on")) return;
+  var m = rectIn($("#main")), r2 = rectIn(el), H = m.h;
+  if (r2.y + r2.h > m.y + H - 90 || r2.y < m.y + 20) await scrollTo(S.y + (r2.y - m.y) - H / 2 + r2.h / 2, tok);
+}
+async function moveTo(el, tok, dy) {
+  var r = rectIn(el), x = r.x + Math.min(r.w * 0.55, r.w - 6), y = r.y + r.h / 2 + (dy || 0);
+  if (S.mode === "phone") x = r.x + r.w / 2;
+  els.cursor.style.transform = "translate(" + x + "px," + y + "px)"; await sleep(780, tok);
+}
+async function tap(sel, tok, opts) {
+  opts = opts || {}; var el = q(sel); await reveal(el, tok); if (opts.spot !== false) setSpot(el, opts.pad); await moveTo(el, tok);
+  els.rip.classList.remove("go"); void els.rip.offsetWidth; els.rip.classList.add("go"); el.classList.add("press"); await sleep(180, tok); el.classList.remove("press"); await sleep(120, tok);
+}
+async function typeIn(sel, text, tok, store) {
+  var box = q(sel); await reveal(box, tok); setSpot(box.closest(".field") || box, 8); await moveTo(box, tok); box.classList.add("foc"); await sleep(250, tok);
+  var v = $(".v", box), cur = ""; for (var i = 0; i < text.length; i++) { cur += text[i]; v.textContent = cur; if (store) store(cur); await sleep(95, tok); } await sleep(250, tok);
+}
+function caption(txt) { els.caption.textContent = txt; }
+function callout(kind, txt) { if (!txt) { els.callout.classList.remove("on"); return; } els.ctag.textContent = kind; els.ctag.className = kind === "Solved" ? "ok" : ""; els.ctext.textContent = txt; els.callout.classList.add("on"); }
+async function pick(tok, a, b, sel) { var e = q(sel); await reveal(e, tok); }
+
+/* ---------- scene info shown in the side panel ---------- */
+var INFO = [
+  { d: "Open the app and see how the store is doing before the first customer walks in.", f: ["Total utang and top debtors", "Low and out-of-stock alerts", "Top sellers of the last 30 days", "Weekly utang vs payments chart"] },
+  { d: "Sell a favorite item in a single tap. No forms, no typing.", f: ["Sell 1 on any favorite", "A receipt is made automatically", "Stock updates instantly", "Out-of-stock items are locked"] },
+  { d: "A full cashier screen built for a busy counter.", f: ["Tiles, search and categories", "Sizes such as stick or pack", "Other item with no stock needed", "Quick amounts and live change"] },
+  { d: "Every sale is kept, so nothing is lost or disputed.", f: ["All sales by date", "Search by receipt no. or item", "Full receipt on one tap"] },
+  { d: "End the day with a cash count that actually balances.", f: ["Keypad cash count", "Short, Over or Balanced in words", "A note is required when it is off", "Selling is locked once closed"] },
+  { d: "Track who owes what, and take payments in parts.", f: ["Balance for every customer", "Full or half payments", "Unpaid and Partly paid badges", "Complete utang history"] },
+  { d: "Maria's staff can use it in the language they prefer.", f: ["English and Filipino", "Every screen is translated", "One tap to save"] }
+];
+function showInfo() {
+  var n = SCENES.length, i = S.i, o = INFO[i] || { d: "", f: [] };
+  $("#stepn").textContent = String(i + 1).padStart(2, "0") + " / " + String(n).padStart(2, "0");
+  $("#stitle").textContent = SCENES[i].title;
+  $("#sdesc").textContent = o.d;
+  $("#sfuncs").innerHTML = o.f.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+}
+
+/* ---------- scenes ---------- */
+var SCENES = [
+ { title: "Today", async run(tok) {
+    caption("Today: utang, low stock and top sellers at a glance.");
+    await sleep(500, tok); setSpot("#cards", 10); await moveTo(q("#cards"), tok, -6); await sleep(1400, tok);
+    callout("Problem", "Who owes what is hard to see at a glance."); await sleep(1800, tok);
+    callout("Solved", "Total utang and top debtors sit on one screen."); setSpot("#debt", 10); await moveTo(q("#debt"), tok); await sleep(1800, tok);
+    caption("Utang added and paid, week by week."); await reveal(q("#chart"), tok); await scrollTo(S.y + 240, tok); setSpot("#chart", 8); await moveTo(q("#chart"), tok); await sleep(2400, tok);
+  }, setup() { S.lang = "en"; S.open = true; paintShell("today"); paintPage(todayHTML()); } },
+ { title: "Quick sell", async run(tok) {
+    var el = $("#quick", els.app); caption("Quick sell: tap Sell 1 on a favorite."); await scrollTo(q("#quick").offsetTop - 30 + 330 - 330, tok);
+    await sleep(500, tok); setSpot("#qs", 8); await sleep(1200, tok);
+    callout("Problem", "A sale changed the stock but left no record."); await sleep(1500, tok);
+    await tap("#sell-coke", tok); QS[0].stock -= 1; $('[data-stock="coke"]').textContent = QS[0].stock + tx().left; toast("Done", "Sold 1 Coke 1.5L. Receipt 20261116-0001.");
+    caption("One tap sells one item and makes a receipt."); callout("Solved", "Every sale becomes a receipt and moves expected cash."); await sleep(2800, tok);
+  }, setup() { S.lang = "en"; S.open = true; QS[0].stock = 20; paintShell("today"); paintPage(todayHTML()); var p = $("#page"); p.style.transition = "none"; } },
+ { title: "Store View", async run(tok) {
+    caption("Store View: tap items to build the cart."); await sleep(800, tok);
+    await tap('[data-tile="fav-coke"]', tok); addLine("coke", "Coke 1.5L", 6500); await sleep(500, tok);
+    await tap('[data-tile="item-marl"]', tok); caption("Sizes: pick Stick or Pack.");
+    showOv(sheet("Choose a size: Marlboro", '<ul class="stack" style="list-style:none;padding:0"><li><span class="btn w" style="justify-content:space-between" id="szStick"><span>Stick</span><span>' + peso(800) + ' · 120 left</span></span></li><li><span class="btn w" style="justify-content:space-between"><span>Pack</span><span>' + peso(16000) + " · 8 left</span></span></li></ul>")); await sleep(900, tok);
+    await tap("#szStick", tok); hideOv(); addLine("stick", "Marlboro Stick", 800); setSpot(null); await sleep(600, tok);
+    caption("Other item: a name and a price. No stock.");
+    await tap("#otherBtn", tok); showOv(sheet("Other item", '<div class="stack3"><p class="muted">For something that is not in your product list. It does not use stock.</p>' + field("Item name", "", { in: "oname", id: "fname" }) + field("Price (₱)", "", { in: "oprice", id: "fprice" }) + btn("Add to cart", { w: 1, id: "oadd" }) + "</div>")); await sleep(700, tok);
+    await typeIn('[data-in="oname"]', "Ice", tok); await typeIn('[data-in="oprice"]', "5", tok);
+    await tap("#oadd", tok); hideOv(); addLine("ice", "Ice", 500); setSpot(null); await sleep(600, tok);
+    if (S.mode === "phone") { SV.open = true; repaintCart(); await sleep(300, tok); }
+    setSpot("#cart", 8); await sleep(1400, tok);
+    caption("Payment: quick amounts and live change.");
+    await tap("#chargeBtn", tok);
+    var tot = svTotal(); var quick = ["Exact", "₱20", "₱50", "₱100", "₱200", "₱500", "₱1,000"];
+    var keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "00"];
+    showOv(sheet("Payment", '<div class="stack4"><p class="paytot"><span>Total</span><b id="ptot">' + peso(tot) + '</b></p><div class="quick" id="quick2">' + quick.map(function (x, i) { return '<span class="btn sec sm" id="q' + i + '">' + x + "</span>"; }).join("") + '</div>' + field("Amount paid (₱)", "", { big: 1, in: "paid" }) + '<div class="pad">' + keys.map(function (k) { return '<span class="btn sec">' + k + "</span>"; }).join("") + '<span class="btn sec wide">⌫</span></div><div class="chg"><p class="a">Change</p><p class="v" id="chg">' + peso(0) + '</p></div>' + btn("Complete sale", { w: 1, id: "done", dis: 1 }) + "</div>")); await sleep(900, tok);
+    await tap("#q3", tok); $('[data-in="paid"] .v').textContent = "100"; $("#chg").textContent = peso(10000 - tot); $("#done").classList.remove("dis"); await reveal(q("#chg"), tok); setSpot("#chg", 8); callout("Problem", "Change is easy to get wrong at the counter."); await sleep(1200, tok);
+    callout("Solved", "Change shows live, in big numbers."); await sleep(1500, tok);
+    await tap("#done", tok); hideOv(); setSpot(null); paintPage(tabs(1) + header("Sale complete", "Give the change and the receipt.") + '<div class="mid">' + receiptCard(R2) + btn("New sale", { w: 1 }) + btn("Receipts log", { sec: 1, w: 1 }) + "</div>");
+    caption("Receipt: items, total, paid and change."); await sleep(500, tok); setSpot("#rcpt", 8); await moveTo(q("#rcpt"), tok); await sleep(2600, tok);
+  }, setup() { S.lang = "en"; S.open = true; SV.cart = []; SV.open = false; paintShell("products"); paintPage(storeViewHTML()); dockCart(); } },
+ { title: "Receipts", async run(tok) {
+    caption("Receipts log: every sale, newest first."); await sleep(900, tok);
+    await typeIn('[data-in="rsearch"]', "coke", tok);
+    $("#page").innerHTML = logHTML("coke"); var b = $('[data-in="rsearch"]'); b.classList.add("foc"); setSpot(".tbl", 6); await sleep(1300, tok);
+    caption("Search by receipt number or item."); await tap('[data-rec="2"]', tok);
+    paintPage(header("Receipt", "", "Receipts") + '<div class="mid">' + receiptCard(R2) + "</div>"); setSpot("#rcpt", 8); caption("Tap a row to open the full receipt."); await sleep(2600, tok);
+  }, setup() { S.lang = "en"; S.open = true; paintShell("products"); paintPage(logHTML("")); } },
+ { title: "Close store", async run(tok) {
+    caption("Close the store: count the cash in the drawer."); await sleep(900, tok);
+    setSpot("#diffcard", 8); await sleep(1100, tok);
+    var seq = ["6", "9", "8"]; for (var i = 0; i < seq.length; i++) { await tap('[data-key="' + seq[i] + '"]', tok, { spot: false }); CL.counted += seq[i]; $('[data-in="counted"] .v').textContent = CL.counted; $("#diff").innerHTML = diffHTML(); $("#cnt").textContent = peso(Math.round(parseFloat(CL.counted) * 100)); }
+    caption("Short or Over is shown in words, not just color."); setSpot("#diffcard", 8); callout("Problem", "A wrong drawer count goes unnoticed."); await sleep(1700, tok);
+    CL.note = ""; paintPage(closeHTML()); $('[data-in="counted"]').classList.remove("foc"); callout("Solved", "A note is required when the count is not balanced."); setSpot("#noteBox", 8);
+    await typeIn('[data-in="note"]', "Paid the ice man", tok, function (v) { CL.note = v; $(".counter", $("#noteBox")).textContent = v.length + " / 200"; });
+    caption("Confirm to close. Selling stays locked until it opens again."); await tap("#closeBtn", tok);
+    showOv(dlg('<h2 class="h2b">Close the store?</h2><p class="m">The count is Short ₱50. You will not be able to sell until you open the store again.</p><div class="stack"><span class="btn amber" style="width:100%;max-width:none" id="okc">Close store</span><span class="btn sec" style="width:100%;max-width:none">Cancel</span></div>')); await sleep(900, tok);
+    await tap("#okc", tok); hideOv(); setSpot(null); S.open = false; refreshBadge(); toast("Done", "The store is closed. Short ₱50");
+    caption("The badge turns CLOSED and sales are locked."); setSpot("#stat", 6); if (S.mode === "phone") setSpot("#stat2", 6); await sleep(2800, tok);
+  }, setup() { S.lang = "en"; S.open = true; CL.counted = ""; CL.note = ""; paintShell("products"); paintPage(closeHTML()); } },
+ { title: "Utang", async run(tok) {
+    caption("Utang: each customer has a balance and history."); await sleep(900, tok); setSpot("#bal", 14); await sleep(1300, tok);
+    callout("Problem", "Partial payments are easy to lose track of."); await sleep(1500, tok);
+    await tap("#payBtn", tok); caption("Pay part of the balance. The new balance shows first.");
+    showOv(dlg('<h2 class="h2b">Pay utang</h2><div class="stack3"><p class="bold" style="font-size:20px;line-height:28px">Balance: ' + peso(25000) + '</p>' + field("Amount to pay (₱)", "", { big: 1, in: "pay" }) + '<div class="btnrow" style="display:grid;grid-template-columns:1fr 1fr"><span class="btn sec" id="full">Full amount (' + peso(25000) + ')</span><span class="btn sec" id="half">Half</span></div><p class="bold pdk" id="after" style="min-height:28px;font-size:18px;line-height:28px"></p><div class="stack"><span class="btn" id="psave" style="width:100%;max-width:none">Save payment</span><span class="btn sec" style="width:100%;max-width:none">Cancel</span></div></div>')); await sleep(900, tok);
+    await tap("#half", tok); $('[data-in="pay"] .v').textContent = "125"; $("#after").textContent = "Balance after: " + peso(12500); await sleep(900, tok);
+    callout("Solved", "Full or half payments update the balance at once."); await tap("#psave", tok);
+    hideOv(); setSpot(null); UT.balance = 52500; UT.rows[1].bal = 12500; paintPage(utangHTML()); toast("Done", "Payment saved. Balance " + peso(52500) + ".");
+    caption("Payment saved. The status shows Partly paid."); setSpot("#bal", 14); await sleep(2800, tok);
+  }, setup() { S.lang = "en"; S.open = true; UT.balance = 65000; UT.rows[1].bal = 25000; paintShell("credit"); paintPage(utangHTML()); } },
+ { title: "Language", async run(tok) {
+    caption("Language: switch the whole app to Filipino."); await sleep(900, tok);
+    await tap('[data-lang="fil"]', tok); $$choice("fil"); await sleep(500, tok);
+    await tap("#saveLang", tok); S.lang = "fil"; paintShell("language"); paintPage(languageHTML("fil")); toast("Tapos na", "Na-save ang wika."); setSpot(null); await sleep(1300, tok);
+    caption("Menus and screens now read in Filipino."); await tap('[data-nav="today"]', tok, { spot: false }); paintShell("today"); paintPage(todayHTML()); setSpot("#tiles", 10); await sleep(2600, tok);
+  }, setup() { S.lang = "en"; S.open = true; paintShell("language"); paintPage(languageHTML("en")); } }
+];
+function $$choice(v) { Array.prototype.forEach.call(els.app.querySelectorAll("[data-lang]"), function (c) { c.classList.toggle("on", c.getAttribute("data-lang") === v); }); }
+
+/* ---------- player ---------- */
+function setProgress() { els.prog.style.transition = "transform .5s ease"; els.prog.style.transform = "scaleX(" + ((S.i + 1) / SCENES.length) + ")"; }
+async function play(i, fromUser) {
+  S.token++; var tok = S.token; S.i = (i + SCENES.length) % SCENES.length; var sc = SCENES[S.i];
+  Array.prototype.forEach.call(els.dots.children, function (li, k) { li.firstChild.setAttribute("aria-current", k === S.i ? "true" : "false"); });
+  clearTransient(); els.cursor.style.transition = "none"; els.cursor.style.transform = "translate(" + SIZE[S.mode].w * 0.7 + "px," + SIZE[S.mode].h * 0.8 + "px)"; void els.cursor.offsetWidth; els.cursor.style.transition = "";
+  caption(""); sc.setup(); setProgress(); showInfo();
+  if (reduce) { try { await sc.run(tok); } catch (e) { if (!(e && e.cancelled)) console.warn(e); } caption(sc.title + ": " + els.caption.textContent); return; }
+  var t0 = Date.now();
+  try {
+    await sleep(300, tok); await sc.run(tok); await sleep(600, tok);
+    if (tok === S.token && !S.paused) play(S.i + 1);
+    else if (tok === S.token) { S.after = function () { play(S.i + 1); }; }
+  } catch (e) { if (!(e && e.cancelled)) console.warn(e); }
+}
+function go(i) { S.after = null; play(i, true); }
+function layout() {
+  var mode = window.innerWidth < 720 ? "phone" : "desktop";
+  if (mode !== S.mode) { S.mode = mode; els.device.className = "device " + mode; els.canvas.className = "canvas" + (mode === "phone" ? " phone" : ""); S.modeChanged = true; }
+  var ph = S.mode === "phone", sz = SIZE[S.mode], aw = els.stage.clientWidth, ah = els.stage.clientHeight;
+  if (!aw || !ah) return;
+  var cw = ph ? 20 : 2, chh = ph ? 20 : 36;
+  var k = Math.max(0.2, (aw - cw) / sz.w), H = (ah - chh) / k, lo = ph ? 560 : 600;
+  if (H < lo) { H = lo; k = Math.max(0.2, Math.min(k, (ah - chh) / H)); } else if (H > 900) H = 900;
+  sz.h = Math.round(H); S.scale = k;
+  els.canvas.style.width = sz.w + "px"; els.canvas.style.height = sz.h + "px"; els.canvas.style.transform = "scale(" + k + ")";
+  els.viewport.style.width = Math.floor(sz.w * k) + "px"; els.viewport.style.height = Math.floor(sz.h * k) + "px";
+}
+function applySpeed() { els.canvas.style.setProperty("--mv", (0.7 * SPEED).toFixed(2) + "s"); els.canvas.style.setProperty("--sc", (0.6 * SPEED).toFixed(2) + "s"); }
+function buildDots() { els.dots.innerHTML = ""; SCENES.forEach(function (s, i) { var li = document.createElement("li"), b = document.createElement("button"); b.type = "button"; b.className = "dot"; b.setAttribute("aria-label", "Scene " + (i + 1) + ": " + s.title); b.title = s.title; b.addEventListener("click", function () { go(i); }); li.appendChild(b); els.dots.appendChild(li); }); }
+function setPaused(p) { S.paused = p; els.play.textContent = p ? "Play" : "Pause"; els.play.setAttribute("aria-label", p ? "Play" : "Pause"); if (!p) { if (S.resume) S.resume(); else if (S.after) { var f = S.after; S.after = null; f(); } } }
+$("#play").addEventListener("click", function () { setPaused(!S.paused); });
+$("#prev").addEventListener("click", function () { go(S.i - 1); });
+$("#next").addEventListener("click", function () { go(S.i + 1); });
+$("#replay").addEventListener("click", function () { go(S.i); });
+document.addEventListener("keydown", function (e) {
+  var tg = e.target && e.target.tagName; if (e.metaKey || e.ctrlKey || e.altKey || modal.classList.contains("on")) return;
+  if (e.key === "ArrowLeft") { go(S.i - 1); e.preventDefault(); } else if (e.key === "ArrowRight") { go(S.i + 1); e.preventDefault(); }
+  else if (e.key === " " && tg !== "BUTTON" && tg !== "A") { setPaused(!S.paused); e.preventDefault(); }
+});
+var sx = null; els.viewport.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+els.viewport.addEventListener("touchend", function (e) { if (sx == null) return; var dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) go(S.i + (dx < 0 ? 1 : -1)); }, { passive: true });
+var rz = 0; function onResize() { var old = S.mode; layout(); if (S.modeChanged) { S.modeChanged = false; go(S.i); } }
+if (window.ResizeObserver) new ResizeObserver(function () { cancelAnimationFrame(rz); rz = requestAnimationFrame(onResize); }).observe(els.stage); else window.addEventListener("resize", onResize);
+
+buildDots(); layout(); applySpeed();
+$("#speed").addEventListener("click", function () { SP = (SP + 1) % SPEEDS.length; SPEED = SPEEDS[SP].v; this.textContent = SPEEDS[SP].l; applySpeed(); });
+var modal = $("#modal");
+function modalOn(v) { modal.classList.toggle("on", v); if (v) $("#closeModal").focus(); else $("#more").focus(); }
+$("#more").addEventListener("click", function () { modalOn(true); });
+$("#closeModal").addEventListener("click", function () { modalOn(false); });
+modal.addEventListener("click", function (e) { if (e.target === modal) modalOn(false); });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape" && modal.classList.contains("on")) modalOn(false); });
+if (reduce) { S.paused = true; els.play.textContent = "Play"; els.play.setAttribute("aria-label", "Play"); }
+var started = false;
+function start() { if (started) return; started = true; layout(); play(0); }
+if (document.fonts && document.fonts.ready) { var t = setTimeout(start, 1500); document.fonts.ready.then(function () { clearTimeout(t); start(); }); } else start();
+})();
+</script>
+</body>
+</html>
