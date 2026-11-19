@@ -32,7 +32,7 @@ const WORKS = {
     { src: 'images/pubmats/graphics-1.webp' },
     { src: 'images/pubmats/happy-teachers-day.webp' },
     { src: 'images/pubmats/ignacio.webp' },
-    { src: 'images/pubmats/marquez.webp' },
+    { src: 'images/pubmats/grocery-profile.webp' },
     { src: 'images/pubmats/messengergp.webp' },
     { src: 'images/pubmats/pubmat-1.webp' },
     { src: 'images/pubmats/pubmat-cover.webp' },
@@ -50,7 +50,7 @@ const WORKS = {
   ],
   merch: [
     { src: 'images/merch/lanyard-1.webp' },
-    { src: 'images/merch/marquez-poloshirt-entry.webp' },
+    { src: 'images/merch/poloshirt-entry.webp' },
   ],
   infographics: [
     { src: 'images/infographics/infographic-1.webp' },
